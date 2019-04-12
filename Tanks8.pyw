@@ -12,20 +12,17 @@ pg.display.set_caption('Tanks8')
 
 """Шрифт"""
 info_string = pg.Surface((WIDTH_WIN, 30))
-pg.font.init()
 text_font = pg.font.SysFont('Arial', 24, True, True)
 
 """Звук"""
 pg.mixer.pre_init(44100, -16, 2, 1024)
-pg.mixer.init()
 
 FPS = 120
 clock = pg.time.Clock()
 
 STARS_SIZE = 16
 STARS_MAX = 100
-WIDTH_Earth = 960
-HEIGHT_Earth = 300
+HEIGHT_Earth = 290
 speed = 8
 life = 11
 killed = 0
@@ -34,7 +31,7 @@ killed = 0
 def load_images(path):
     images = []
     for file_name in os.listdir(path):
-        image = pg.image.load(path + os.sep + file_name).convert_alpha()
+        image = pg.image.load(path + os.sep + file_name)  # .convert_alpha()
         images.append(image)
     print(path, images)
     return images
@@ -61,20 +58,25 @@ class Menu:
         tx = WIDTH_WIN
         tx_min = -330
 
-        helicopter.velocity = (0, 0)
         tank1.velocity.y = 0
         tank1.position.x = 150
         tank1.position.y = 450
+        helicopter.velocity = (0, 0)
+        helicopter.scale = 0.6
         helicopter.position.x = 750
         helicopter.position.y = 150
         barrel.position.x = tank1.position.x + 25
         barrel.position.y = tank1.position.y - 15
+        bullet.position = helicopter.position + (0, 30)
+        barrel.angle = -10
+        fire.angle = barrel.angle
+        helicopter.angle = 180
+        bullet.angle = helicopter.angle
         salvoH2 = 0
         salvoT2 = 0
         time_fire = 0
         menu_box = pg.sprite.Group(helicopter, barrel, tank1, mouseMenu)
         if int(life) <= 0:
-            # menu_box.add(burn)
             fire_block = 1
 
         font_menu = pg.font.SysFont('Arial', 96, True, True)
@@ -111,11 +113,11 @@ class Menu:
         burn_img.set_colorkey((0, 0, 0))
         images13 = [burn_img.subsurface((0, 0, 141, 237)),
                     burn_img.subsurface((141, 0, 141, 237))]
-        burn = Burn(x=tank1.position.x - 70, y=tank1.position.y - 200, images=images13)
+        burn = Burn(x=tank1.position.x, y=tank1.position.y, images=images13)
 
         runMenu = True
         while runMenu:
-            pg.time.wait(5)
+            clock.tick(FPS/2)
 
             m_pos = pg.mouse.get_pos()
             for b in self.points:
@@ -123,10 +125,10 @@ class Menu:
                     point = b[5]
             for e in pg.event.get():
                 if e.type == pg.QUIT:
-                    sys.exit()
+                    sys.exit(0)
                 if e.type == pg.KEYDOWN:
                     if e.key == pg.K_ESCAPE:
-                        sys.exit()
+                        sys.exit(0)
                     if e.key == pg.K_UP:
                         if point > 0:
                             point -= 1
@@ -137,17 +139,19 @@ class Menu:
                         if point == 0 and fire_block == 0:
                             runMenu = False
                         elif point == 1:
-                            sys.exit()
+                            sys.exit(0)
             if e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
                 if point == 0 and fire_block == 0:
+                    helicopter.position.x = WIDTH_WIN * 2
+                    tank1.position.x = -200
                     runMenu = False
                 elif point == 1:
-                    sys.exit()
+                    sys.exit(0)
 
             if salvoH2 == 0:
                 bullet.position.x = helicopter.position.x
                 bullet.position.y = helicopter.position.y + 30
-                bullet.velocity = pg.math.Vector2(-25, 0)
+                bullet.velocity = pg.math.Vector2(-10, 0)
                 salvoH2 = 1
             elif not bullet.rect.colliderect(helicopter.rect):
                 menu_box.add(bullet)
@@ -155,17 +159,18 @@ class Menu:
                     bullet.velocity = (0, 0)
                     menu_box.remove(bullet)
                     salvoH2 = 0
+
             if fire_block == 0:
                 if salvoT2 == 0:
                     fire.position.x = barrel.position.x
                     fire.position.y = barrel.position.y
-                    fire.velocity = pg.math.Vector2(3, 0).rotate(-10)
+                    fire.velocity = pg.math.Vector2(1, 0).rotate(-10)
                     time_fire = 0
                     salvoT2 = 1
                 elif not fire.rect.colliderect(barrel.rect):
                     menu_box.add(fire)
                     time_fire += 1
-                    if time_fire > 3:
+                    if time_fire > 5:
                         menu_box.remove(fire)
                         salvoT2 = 0
 
@@ -197,20 +202,17 @@ class Menu:
             screen.blit(text6, text6_pos)
             screen.blit(running_line, text7_pos)
             screen.blit(text8, text8_pos)
-            tank1.update(images1, False, False, 0, 1.8)
-            barrel.update(images2, False, False, -10, 1.2)
-            helicopter.update(images3, True, False, 0, 0.55)
-            bullet.update(images10, False, False, -180, 1)
-            fire.update(images9, False, False, -10, 1.5)
-            menu_box.draw(screen)
+
             if fire_block == 1:
-                burn.update(screen)
-            pg.display.flip()
+                burn.update()
+            menu_box.update()
+            menu_box.draw(screen)
+            pg.display.update()
 
 
 class Health(pg.sprite.Sprite):
     def __init__(self, images):
-        super(Health, self).__init__()
+        pg.sprite.Sprite.__init__(self)
         self.images = images
         self.index = 5
         self.image = images[self.index]
@@ -218,31 +220,31 @@ class Health(pg.sprite.Sprite):
         self.rect.center = info_string.get_rect().center
 
     def update(self):
-        self.index = round(life / 2)
+        self.index = round(life / 2.0)
         self.image = self.images[self.index]
 
 
 class Earth(pg.sprite.Sprite):
     def __init__(self, x, y, images):
-        super(Earth, self).__init__()
+        pg.sprite.Sprite.__init__(self)
 
         self.images = images
         self.index = 0  # первый кадр (костюм)
-        self.image = images[self.index]
+        self.image = self.images[self.index]
 
-        self.position = pg.math.Vector2(x, y)
         self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
     def update(self):
-        self.position.x -= speed
-        if self.position.x <= 0 - WIDTH_Earth / 2:
-            self.position.x = WIDTH_WIN + WIDTH_Earth / 2
+        self.rect.x -= speed
+        if self.rect.x <= -WIDTH_WIN:
+            self.rect.x = WIDTH_WIN
             self.index += random.randint(1, 2)
             if self.index >= len(self.images):
                 self.index = 0
             self.image = self.images[self.index]
-
-        self.rect.center = self.position
+        gravitation()
 
 
 class Stars:
@@ -266,24 +268,22 @@ class Stars:
 
 class SpriteAnimation(pg.sprite.Sprite):
     def __init__(self, images, x, y, dx, dy, angle, scale):
-        super(SpriteAnimation, self).__init__()
+        super().__init__()
+        self.angle = angle
+        self.scale = scale
+        self.images = [pg.transform.flip(im, dx, dy) for im in images]
 
-        images = [pg.transform.flip(image, dx, dy) for image in images]
-        images = [pg.transform.rotozoom(image, -angle, scale) for image in images]
-        self.images = images
         self.index = 0
-        self.image = images[self.index]
+        self.image = self.images[self.index]
 
-        self.velocity = pg.math.Vector2(0, 0)
-        self.position = pg.math.Vector2(x, y)
         self.rect = self.image.get_rect()
+        self.position = pg.math.Vector2(x, y)
+        self.velocity = pg.math.Vector2()
 
-    def update(self, images, dx, dy, angle, scale):
-        images = [pg.transform.flip(image, dx, dy) for image in images]
-        images = [pg.transform.rotozoom(image, -angle, scale) for image in images]
-        self.images = images
+    def update(self):
+        images = [pg.transform.rotozoom(img, -self.angle, self.scale) for img in self.images]
         self.index += 0.2
-        self.image = self.images[int(self.index % len(self.images))]
+        self.image = images[int(self.index % len(images))]
 
         self.position += self.velocity
         self.rect.center = self.position
@@ -292,39 +292,50 @@ class SpriteAnimation(pg.sprite.Sprite):
 
 class Sprite(pg.sprite.Sprite):
     def __init__(self, images, x, y, dx, dy, angle, scale):
-        super(Sprite, self).__init__()
-        images = [pg.transform.flip(image, dx, dy) for image in images]
-        images = [pg.transform.rotozoom(image, -angle, scale) for image in images]
+        pg.sprite.Sprite.__init__(self)
+        self.angle = angle
+        self.scale = scale
+        self.images = [pg.transform.flip(i, dx, dy) for i in images]
         self.images = images
         self.image = images[0]
 
-        self.velocity = pg.math.Vector2(0, 0).rotate(angle)
+        self.rect = self.image.get_rect()
+        self.velocity = pg.math.Vector2().rotate(angle)
         self.position = pg.math.Vector2(x, y)
-        self.rect = self.image.get_rect(center=(x, y))
 
-    def update(self, images, dx, dy, angle, scale):
-        images = [pg.transform.flip(image, dx, dy) for image in images]
-        images = [pg.transform.rotozoom(image, -angle, scale) for image in images]
-        self.images = images
-        self.image = self.images[0]
-
+    def run(self):
+        images = [pg.transform.rotozoom(j, -self.angle, self.scale) for j in self.images]
+        self.image = images[0]
         self.position += self.velocity
         self.rect.center = self.position
         self.rect = self.image.get_rect(center=self.rect.center)
 
+    def update(self):
+        mouseMenu.run()
+        bullet.run()
+        fire.run()
 
-class Burn:
+        fire2.run()
+        shell.run()
+        shell2.run()
+
+        sight.run()
+        barrel.run()
+        barrel2.run()
+
+
+class Burn(pg.sprite.Sprite):
     def __init__(self, images, x, y):
-        self.x = x
-        self.y = y
+        pg.sprite.Sprite.__init__(self)
         self.images = images
         self.frame = 0
-        self.image = images[self.frame]
+        self.image = self.images[self.frame]
+        self.rect = self.image.get_rect(center=(x, y-self.image.get_height()/3))
 
-    def update(self, scr):
+    def update(self):
         self.frame += 0.2
         self.image = self.images[int(self.frame % len(self.images))]
-        scr.blit(self.image, (self.x, self.y))
+        screen.blit(self.image, (self.rect.x, self.rect.y))
 
 
 def initialize_stars(stars_max, star):
@@ -351,55 +362,6 @@ def gravitation():
 stars = []
 initialize_stars(STARS_MAX, stars)
 
-tank_width = 84
-tank1_dx = False  # 1 - True, 0 - False
-tank1_dy = False
-tank1_angle = 0
-tank1_scale = 1.80
-tank1_pos = 196
-barrel_dx = False
-barrel_dy = False
-barrel_angle = -10
-barrel_scale = 1.20
-h_dx = False
-h_dy = True
-h_angle = 0
-h_scale = 0.35
-h_max_scale = 0.6
-h_height = 150
-tank2_dx = False
-tank2_dy = False
-tank2_angle = 0
-tank2_scale = 1.80
-barrel2_dx = False
-barrel2_dy = False
-barrel2_angle = 5
-barrel2_scale = 1.2
-sight_dx = False
-sight_dy = False
-sight_angle = 0
-sight_scale = 0.5
-shell_dx = False
-shell_dy = False
-shell_angle = 0
-shell_scale = 0.4
-shell2_dx = True
-shell2_angle = 0
-explosion_dx = False
-explosion_dy = False
-explosion_angle = 0
-explosion_scale = 0.01
-explosion2_scale = 0.01
-fire2_dx = True
-fire2_angle = 0
-fire_dx = False
-fire_dy = False
-fire_angle = 0
-fire_scale = 1.5
-bullet_dx = False
-bullet_dy = False
-bullet_angle = 0
-bullet_scale = 1.0
 blocking = 0
 salvoT = 0
 salvoH = 0
@@ -414,89 +376,60 @@ expH1 = 0
 hit = 0
 
 images0 = load_images(path='Image/Earth')
-earth = Earth(x=WIDTH_Earth / 2, y=HEIGHT_WIN - HEIGHT_Earth / 2, images=images0)
-earth_clone = Earth(x=WIDTH_Earth / 2 + WIDTH_Earth, y=HEIGHT_WIN - HEIGHT_Earth / 2, images=images0)
+earth = Earth(x=0, y=HEIGHT_WIN - images0[0].get_height(), images=images0)
+earth_clone = Earth(x=WIDTH_WIN, y=HEIGHT_WIN - images0[0].get_height(),
+                    images=images0)
 
 images1 = load_images(path='Image/Tank1')
-tank1 = SpriteAnimation(x=tank1_pos, y=420,
-                        dx=tank1_dx, dy=tank1_dy,
-                        images=images1,
-                        angle=tank1_angle, scale=tank1_scale)
+tank1_pos = 196
+tank_width = images1[0].get_width()
+tank1 = SpriteAnimation(x=tank1_pos, y=420, dx=False, dy=False, images=images1,
+                        angle=0, scale=1.7)
 
 images2 = load_images(path='Image/Дуло1')
-barrel = Sprite(x=tank1.position.x + 25, y=tank1.position.y - 15,
-                dx=barrel_dx, dy=barrel_dy,
-                images=images2,
-                angle=barrel_angle, scale=barrel_scale)
+barrel = Sprite(x=tank1.position.x + 25, y=tank1.position.y - 15, dx=False, dy=False,
+                images=images2, angle=-10, scale=1.2)
 
 images3 = load_images(path='Image/Helicopter')
-helicopter = SpriteAnimation(x=700, y=150,
-                             dx=h_dx, dy=h_dy,
-                             images=images3,
-                             angle=h_angle, scale=h_scale)
+h_max_scale = 0.6
+h_height = images3[0].get_height()
+helicopter = SpriteAnimation(x=WIDTH_WIN*2, y=150, dx=False, dy=True, images=images3,
+                             angle=180, scale=h_max_scale)
 
 images4 = load_images(path='Image/Tank2')
-tank2 = SpriteAnimation(x=2000, y=420,
-                        dx=tank2_dx, dy=tank2_dy,
-                        images=images4,
-                        angle=tank2_angle, scale=tank2_scale)
+tank2 = SpriteAnimation(x=2000, y=420, dx=False, dy=False, images=images4,
+                        angle=0, scale=1.7)
 
 images5 = load_images(path='Image/Дуло2')
-barrel2 = Sprite(x=2000, y=420,
-                 dx=barrel2_dx, dy=barrel2_dy,
-                 images=images5,
-                 angle=barrel2_angle, scale=barrel2_scale)
+barrel2 = Sprite(x=2000, y=420, dx=False, dy=False, images=images5, angle=5, scale=1.2)
 
 images6 = load_images(path='Image/Прицел')
-sight = Sprite(x=0, y=0,
-               dx=sight_dx, dy=sight_dy,
-               images=images6,
-               angle=sight_angle, scale=sight_scale)
+sight = Sprite(x=0, y=0, dx=False, dy=False, images=images6, angle=False, scale=0.5)
 
 images7 = load_images(path='Image/Снаряд')
-shell = Sprite(x=-100, y=0,
-               dx=shell_dx, dy=shell_dy,
-               images=images7,
-               angle=shell_angle, scale=shell_scale)
-shell2 = Sprite(x=1000, y=0,
-                dx=shell2_dx, dy=shell_dy,
-                images=images7,
-                angle=shell2_angle, scale=shell_scale)
+shell = Sprite(x=-100, y=0, dx=False, dy=False, images=images7, angle=0, scale=0.4)
+shell2 = Sprite(x=1000, y=0, dx=True, dy=False, images=images7, angle=0, scale=0.4)
 
 images8 = load_images(path='Image/Взрыв')
-explosion = SpriteAnimation(x=-200, y=-200,
-                            dx=explosion_dx, dy=explosion_dy,
-                            images=images8,
-                            angle=explosion_angle, scale=explosion_scale)
-explosion2 = SpriteAnimation(x=-200, y=-200,
-                             dx=explosion_dx, dy=explosion_dy,
-                             images=images8,
-                             angle=explosion_angle, scale=explosion2_scale)
+explosion = SpriteAnimation(x=-200, y=-200, dx=False, dy=False, images=images8,
+                            angle=False, scale=0.01)
+explosion2 = SpriteAnimation(x=-200, y=-200, dx=False, dy=False, images=images8,
+                             angle=False, scale=0.01)
 
 images9 = load_images(path='Image/fire')
-fire = Sprite(x=-300, y=-300,
-              dx=fire_dx, dy=fire_dy,
-              images=images9,
-              angle=fire_angle, scale=fire_scale)
+fire = Sprite(x=-300, y=-300, dx=False, dy=False, images=images9, angle=0, scale=1.5)
 
-fire2 = Sprite(x=-300, y=-300,
-               dx=fire2_dx, dy=fire_dy,
-               images=images9,
-               angle=fire2_angle, scale=fire_scale)
+fire2 = Sprite(x=-300, y=-300, dx=True, dy=False, images=images9, angle=0, scale=1.5)
 
 images10 = load_images(path='Image/Bullet')
-bullet = Sprite(x=-500, y=100,
-                dx=bullet_dx, dy=bullet_dy,
-                images=images10,
-                angle=bullet_angle, scale=bullet_scale)
+bullet = Sprite(x=-500, y=100, dx=False, dy=False, images=images10,
+                angle=0, scale=1.0)
 
 images11 = load_images(path='Image/Здоровье')
 health = Health(images=images11)
 
 images12 = load_images(path='Image/Mouse')
-mouseMenu = Sprite(x=780, y=330,
-                   dx=False, dy=False,
-                   images=images12,
+mouseMenu = Sprite(x=780, y=330, dx=False, dy=False, images=images12,
                    angle=0, scale=0.2)
 
 """images13 = load_images(path='Image/Костер')
@@ -531,7 +464,7 @@ while True:
     clock.tick(FPS)
     for e in pg.event.get():
         if e.type == pg.QUIT or e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE:
-            sys.exit()
+            sys.exit(0)
 
     """Танк1"""
     if tank1.position.x < tank1_pos:
@@ -541,12 +474,12 @@ while True:
         tank1.velocity.y = 0
 
     """Вертолет"""
-    _, h_angle = (tank1.position - helicopter.position).as_polar()
-    helicopter.velocity = pg.math.Vector2(speed + speedH, 1).rotate(h_angle)
+    _, helicopter.angle = (tank1.position - helicopter.position).as_polar()
+    helicopter.velocity = pg.math.Vector2(speed + speedH, 0.3).rotate(helicopter.angle)
     if helicopter.position.x < WIDTH_WIN:
-        h_scale += 0.003
-        if h_scale > h_max_scale:
-            h_scale = h_max_scale
+        helicopter.scale += 0.003
+        if helicopter.scale > h_max_scale:
+            helicopter.scale = h_max_scale
 
     """Танк2"""
     tank2.position.x -= speed + speedT
@@ -557,11 +490,11 @@ while True:
         tank2.velocity.y = 0
 
     """Дуло"""
-    _, barrel_angle = (pg.mouse.get_pos() - barrel.position).as_polar()
-    if barrel_angle > 10:
-        barrel_angle = 10
-    if barrel_angle < -25:
-        barrel_angle = -25
+    _, barrel.angle = (pg.mouse.get_pos() - barrel.position).as_polar()
+    if barrel.angle > 10:
+        barrel.angle = 10
+    if barrel.angle < -25:
+        barrel.angle = -25
     barrel.position = tank1.position + (25, -15)
     barrel2.position = tank2.position + (-20, -15)
 
@@ -587,17 +520,17 @@ while True:
         # print('снаряд - E')
         all_sprites.remove(shell_box)
         all_sprites.add(explosion, layer=4)
-        if explosion_scale <= 0.2:
+        if explosion.scale < 0.2:
             shell.velocity = (0, 0)
             explosion.position = shell.position
-            explosion_scale += 0.01
+            explosion.scale += 0.01
         else:
             blocking = 0
             shell.velocity = (0, 0)
             shell.position = barrel.position + (0, -1)
             fire.velocity = (0, 0)
             fire.position = barrel.position
-            explosion_scale = 0.01
+            explosion.scale = 0.01
             all_sprites.remove(explosion)
     elif pg.sprite.spritecollide(helicopter, player_box, True, pg.sprite.collide_rect_ratio(.7)):
         life -= 1
@@ -610,36 +543,36 @@ while True:
         all_sprites.remove(other_box)
         hit = 1
     elif expT == 1:
-        if explosion_scale <= 0.2:
+        if explosion.scale < 0.2:
             shell.velocity = (0, 0)
             tank2.position.x += speed + speedT
             explosion.position = tank2.position
-            explosion_scale += 0.01
+            explosion.scale += 0.01
         else:
             tank2.position.x = WIDTH_WIN * random.randint(2, 3)
             barrel2.position = tank2.position
-            explosion_scale = 0.01
+            explosion.scale = 0.01
             shell.position = barrel.position + (0, -1)
             all_sprites.remove(explosion)
             all_sprites.remove(shell_box)
             speedT = random.randint(0, 1)
-            barrel2_angle = random.randint(2, 5)
+            barrel2.angle = random.randint(2, 5)
             blocking = 0
             expT = 0
     elif expH == 1:
-        if explosion_scale <= 0.2:
+        if explosion.scale < 0.2:
             shell.velocity = (0, 0)
             helicopter.velocity = (-1, 2)
             explosion.position = helicopter.position
-            explosion_scale += 0.01
+            explosion.scale += 0.01
         else:
             helicopter.position.x = WIDTH_WIN * random.randint(2, 3)
             helicopter.position.y = random.randint(0, HEIGHT_WIN - HEIGHT_Earth * 1.2)
-            explosion_scale = 0.01
+            explosion.scale = 0.01
             shell.position = barrel.position + (0, -1)
             all_sprites.remove(explosion)
             all_sprites.remove(shell_box)
-            h_scale = 0.35
+            helicopter.scale = 0.35
             speedH = random.randint(-1, 1)
             blocking = 0
             expH = 0
@@ -660,10 +593,10 @@ while True:
         helicopter.position.y = random.randint(0, HEIGHT_WIN - HEIGHT_Earth * 1.2)
         barrel.position = tank1.position + (25, -15)
         barrel2.position = tank2.position + (-21, -15)
-        h_scale = 0.35
+        helicopter.scale = 0.35
         speedH = random.randint(-1, 1)
         speedT = random.randint(0, 1)
-        barrel2_angle = random.randint(2, 5)
+        barrel2.angle = random.randint(2, 5)
         fire.velocity = (0, 0)
         fire.position = barrel.position
         shell2.velocity = (0, 0)
@@ -683,9 +616,9 @@ while True:
         if salvoH == 0 and expH == 0 and expH1 == 0 and hit == 0:
             bullet_box.add(bullet)
             bullet.position.x = helicopter.position.x
-            bullet.position.y = helicopter.position.y + h_height * h_scale / 3
-            bullet_angle = h_angle - 180
-            bullet.velocity = pg.math.Vector2(-25, 0).rotate(bullet_angle)
+            bullet.position.y = helicopter.position.y + h_height * helicopter.scale / 3.0
+            bullet.angle = helicopter.angle - 180
+            bullet.velocity = pg.math.Vector2(-10, 0).rotate(bullet.angle)
             salvoH = 1
             soundH.play()
         elif not bullet.rect.colliderect(helicopter.rect):
@@ -696,7 +629,7 @@ while True:
             or bullet.rect.colliderect(earth.rect) or bullet.rect.colliderect(earth_clone.rect):
         bullet.velocity = (0, 0)
         bullet.position.x = helicopter.position.x
-        bullet.position.y = helicopter.position.y + h_height * h_scale / 3
+        bullet.position.y = helicopter.position.y + h_height * helicopter.scale / 3.0
         all_sprites.remove(bullet_box)
         expH1 = 0
         salvoH = 0
@@ -711,10 +644,10 @@ while True:
             shell2_box.add(shell2)
             fire2.position = barrel2.position
             shell2.position = barrel2.position
-            fire2_angle = barrel2_angle
-            shell2_angle = barrel2_angle
-            fire2.velocity = pg.math.Vector2(-15, 0).rotate(fire2_angle)
-            shell2.velocity = pg.math.Vector2(-15, 0).rotate(shell2_angle)
+            fire2.angle = barrel2.angle
+            shell2.angle = barrel2.angle
+            fire2.velocity = pg.math.Vector2(-5, 0).rotate(fire2.angle)
+            shell2.velocity = pg.math.Vector2(-5, 0).rotate(shell2.angle)
             time_fire2 = 0
             salvoT = 1
             soundT2.play()
@@ -727,19 +660,19 @@ while True:
 
     """Снаряд_2 - collision"""
     if pg.sprite.spritecollide(tank1, shell2_box, True):
+        explosion2.position = tank1.position
         expT1 = 1
         life -= 0.2
-        explosion2.position = tank1.position
         print('снаряд2 - Т1')
     elif shell2.position.x < 1:
         explosion2.position = (0, shell2.position.y)
         expT1 = 1
     elif expT1 == 1 and hit == 0:
         all_sprites.add(explosion2, layer=4)
-        if explosion2_scale <= 0.2:
-            explosion2_scale += 0.01
+        if explosion2.scale < 0.2:
+            explosion2.scale += 0.01
         else:
-            explosion2_scale = 0.01
+            explosion2.scale = 0.01
             all_sprites.remove(explosion2)
             expT1 = 0
     if expT1 == 1:
@@ -756,13 +689,17 @@ while True:
         shell_box.add(shell)
         fire.position = barrel.position
         shell.position = barrel.position + (0, -1)
-        fire_angle = barrel_angle
-        shell_angle = barrel_angle
-        fire.velocity = pg.math.Vector2(20, 0).rotate(fire_angle)
-        shell.velocity = pg.math.Vector2(20, 0).rotate(shell_angle)
+        fire.angle = barrel.angle
+        shell.angle = barrel.angle
+        fire.velocity = pg.math.Vector2(10, 0).rotate(fire.angle)
+        shell.velocity = pg.math.Vector2(10, 0).rotate(shell.angle)
         blocking = 1
         time_fire1 = 0
         soundT1.play()
+    elif key[pg.K_m]:
+        pg.mouse.set_visible(True)
+        menu_points[0] = (330, 250, 'PAUSE', (250, 250, 30), (250, 30, 250), 0)
+        game.menu()
     elif not fire.rect.colliderect(barrel.rect):
         all_sprites.add(shell_box, layer=0)
         all_sprites.add(fire, layer=1)
@@ -771,10 +708,6 @@ while True:
             all_sprites.remove(fire)
             fire.velocity = (0, 0)
             fire.position = barrel.position
-    elif key[pg.K_m]:
-        pg.mouse.set_visible(True)
-        menu_points[0] = (330, 250, 'PAUSE', (250, 250, 30), (250, 30, 250), 0)
-        game.menu()
 
     if life >= 10:
         life = 10
@@ -790,26 +723,10 @@ while True:
         i.draw_star()
 
     info_string.fill((90, 0, 255))
-    info_string.blit(text_font.render('Очки: ' + str(killed), 1, (255, 255, 255)), (10, 2))
-    info_string.blit(text_font.render('Жизни: ' + str(int(life)), 1, (255, 255, 255)), (840, 2))
+    info_string.blit(text_font.render(f'Очки: {killed}', 1, (255, 255, 255)), (10, 2))
+    info_string.blit(text_font.render(f'Жизни: {int(life)}', 1, (255, 255, 255)), (840, 2))
     screen.blit(info_string, (0, 0))
 
-    gravitation()
-    health.update()
-    earth.update()
-    earth_clone.update()
-    tank1.update(images1, tank1_dx, tank1_dy, tank1_angle, tank1_scale)
-    barrel.update(images2, barrel_dx, barrel_dy, barrel_angle, barrel_scale)
-    helicopter.update(images3, h_dx, h_dy, h_angle, h_scale)
-    tank2.update(images4, tank2_dx, tank2_dy, tank2_angle, tank2_scale)
-    barrel2.update(images5, barrel2_dx, barrel2_dy, barrel2_angle, barrel2_scale)
-    sight.update(images6, sight_dx, sight_dy, sight_angle, sight_scale)
-    shell.update(images7, shell_dx, shell_dy, shell_angle, shell_scale)
-    shell2.update(images7, shell2_dx, shell_dy, shell2_angle, shell_scale)
-    explosion.update(images8, explosion_dx, explosion_dy, explosion_angle, explosion_scale)
-    explosion2.update(images8, explosion_dx, explosion_dy, explosion_angle, explosion2_scale)
-    fire.update(images9, fire_dx, fire_dy, fire_angle, fire_scale)
-    fire2.update(images9, fire2_dx, fire_dy, fire2_angle, fire_scale)
-    bullet.update(images10, bullet_dx, bullet_dy, bullet_angle, bullet_scale)
+    all_sprites.update()
     all_sprites.draw(screen)
     pg.display.update()
