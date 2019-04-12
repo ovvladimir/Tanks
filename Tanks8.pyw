@@ -295,16 +295,15 @@ class Sprite(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self)
         self.angle = angle
         self.scale = scale
-        self.images = [pg.transform.flip(i, dx, dy) for i in images]
-        self.images = images
-        self.image = images[0]
+        self.images = [pg.transform.flip(obj, dx, dy) for obj in images]
+        self.image = self.images[0]
 
         self.rect = self.image.get_rect()
         self.velocity = pg.math.Vector2().rotate(angle)
         self.position = pg.math.Vector2(x, y)
 
     def run(self):
-        images = [pg.transform.rotozoom(j, -self.angle, self.scale) for j in self.images]
+        images = [pg.transform.rotozoom(obj2, -self.angle, self.scale) for obj2 in self.images]
         self.image = images[0]
         self.position += self.velocity
         self.rect.center = self.position
@@ -431,12 +430,6 @@ health = Health(images=images11)
 images12 = load_images(path='Image/Mouse')
 mouseMenu = Sprite(x=780, y=330, dx=False, dy=False, images=images12,
                    angle=0, scale=0.2)
-
-"""images13 = load_images(path='Image/Костер')
-burn = SpriteAnimation(x=tank1.position.x-40, y=tank1.position.y-45,
-                       dx=False, dy=False,
-                       images=images13,
-                       angle=0, scale=0.3)"""
 
 bullet_box = pg.sprite.Group(bullet)
 shell_box = pg.sprite.Group(shell)
