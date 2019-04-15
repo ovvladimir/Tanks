@@ -62,7 +62,7 @@ class Menu:
         tank1.position.x = 150
         tank1.position.y = 450
         helicopter.velocity = (0, 0)
-        helicopter.scale = 0.6
+        helicopter.scale = h_max_scale
         helicopter.position.x = 750
         helicopter.position.y = 150
         barrel.position.x = tank1.position.x + 25
@@ -143,6 +143,7 @@ class Menu:
             if e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
                 if point == 0 and fire_block == 0:
                     helicopter.position.x = WIDTH_WIN * 2
+                    helicopter.scale = h_max_scale / 2
                     tank1.position.x = -200
                     runMenu = False
                 elif point == 1:
@@ -302,7 +303,7 @@ class Sprite(pg.sprite.Sprite):
         self.velocity = pg.math.Vector2().rotate(angle)
         self.position = pg.math.Vector2(x, y)
 
-    def run(self):
+    def render(self):
         images = [pg.transform.rotozoom(obj2, -self.angle, self.scale) for obj2 in self.images]
         self.image = images[0]
         self.position += self.velocity
@@ -310,17 +311,17 @@ class Sprite(pg.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def update(self):
-        mouseMenu.run()
-        bullet.run()
-        fire.run()
+        mouseMenu.render()
+        bullet.render()
+        fire.render()
 
-        fire2.run()
-        shell.run()
-        shell2.run()
+        fire2.render()
+        shell.render()
+        shell2.render()
 
-        sight.run()
-        barrel.run()
-        barrel2.run()
+        sight.render()
+        barrel.render()
+        barrel2.render()
 
 
 class Burn(pg.sprite.Sprite):
@@ -382,7 +383,7 @@ earth_clone = Earth(x=WIDTH_WIN, y=HEIGHT_WIN - images0[0].get_height(),
 images1 = load_images(path='Image/Tank1')
 tank1_pos = 196
 tank_width = images1[0].get_width()
-tank1 = SpriteAnimation(x=tank1_pos, y=420, dx=False, dy=False, images=images1,
+tank1 = SpriteAnimation(x=-tank1_pos, y=0, dx=False, dy=False, images=images1,
                         angle=0, scale=1.7)
 
 images2 = load_images(path='Image/Дуло1')
@@ -392,15 +393,15 @@ barrel = Sprite(x=tank1.position.x + 25, y=tank1.position.y - 15, dx=False, dy=F
 images3 = load_images(path='Image/Helicopter')
 h_max_scale = 0.6
 h_height = images3[0].get_height()
-helicopter = SpriteAnimation(x=WIDTH_WIN*2, y=150, dx=False, dy=True, images=images3,
-                             angle=180, scale=h_max_scale)
+helicopter = SpriteAnimation(x=WIDTH_WIN*2, y=0, dx=False, dy=True, images=images3,
+                             angle=180, scale=h_max_scale/2)
 
 images4 = load_images(path='Image/Tank2')
-tank2 = SpriteAnimation(x=2000, y=420, dx=False, dy=False, images=images4,
+tank2 = SpriteAnimation(x=2000, y=0, dx=False, dy=False, images=images4,
                         angle=0, scale=1.7)
 
 images5 = load_images(path='Image/Дуло2')
-barrel2 = Sprite(x=2000, y=420, dx=False, dy=False, images=images5, angle=5, scale=1.2)
+barrel2 = Sprite(x=2000, y=0, dx=False, dy=False, images=images5, angle=5, scale=1.2)
 
 images6 = load_images(path='Image/Прицел')
 sight = Sprite(x=0, y=0, dx=False, dy=False, images=images6, angle=False, scale=0.5)
@@ -421,7 +422,7 @@ fire = Sprite(x=-300, y=-300, dx=False, dy=False, images=images9, angle=0, scale
 fire2 = Sprite(x=-300, y=-300, dx=True, dy=False, images=images9, angle=0, scale=1.5)
 
 images10 = load_images(path='Image/Bullet')
-bullet = Sprite(x=-500, y=100, dx=False, dy=False, images=images10,
+bullet = Sprite(x=-500, y=0, dx=False, dy=False, images=images10,
                 angle=0, scale=1.0)
 
 images11 = load_images(path='Image/Здоровье')
@@ -470,7 +471,7 @@ while True:
     _, helicopter.angle = (tank1.position - helicopter.position).as_polar()
     helicopter.velocity = pg.math.Vector2(speed + speedH, 0.3).rotate(helicopter.angle)
     if helicopter.position.x < WIDTH_WIN:
-        helicopter.scale += 0.003
+        helicopter.scale += 0.004
         if helicopter.scale > h_max_scale:
             helicopter.scale = h_max_scale
 
@@ -535,7 +536,8 @@ while True:
         print('T1-T2')
         all_sprites.remove(other_box)
         hit = 1
-    elif expT == 1:
+
+    if expT == 1:
         if explosion.scale < 0.2:
             shell.velocity = (0, 0)
             tank2.position.x += speed + speedT
@@ -552,7 +554,7 @@ while True:
             barrel2.angle = random.randint(2, 5)
             blocking = 0
             expT = 0
-    elif expH == 1:
+    if expH == 1:
         if explosion.scale < 0.2:
             shell.velocity = (0, 0)
             helicopter.velocity = (-1, 2)
@@ -560,16 +562,16 @@ while True:
             explosion.scale += 0.01
         else:
             helicopter.position.x = WIDTH_WIN * random.randint(2, 3)
-            helicopter.position.y = random.randint(0, HEIGHT_WIN - HEIGHT_Earth * 1.2)
+            helicopter.position.y = random.randint(-200, HEIGHT_WIN - HEIGHT_Earth * 1.2)
             explosion.scale = 0.01
             shell.position = barrel.position + (0, -1)
             all_sprites.remove(explosion)
             all_sprites.remove(shell_box)
-            helicopter.scale = 0.35
+            helicopter.scale = h_max_scale / 2
             speedH = random.randint(-1, 1)
             blocking = 0
             expH = 0
-    elif hit == 1:
+    if hit == 1:
         all_sprites.remove(bullet_box)
         all_sprites.remove(explosion)
         all_sprites.remove(explosion2)
@@ -583,10 +585,10 @@ while True:
         tank1.position.x = -tank_width * 5
         tank2.position.x = WIDTH_WIN * random.randint(2, 3)
         helicopter.position.x = WIDTH_WIN * random.randint(2, 3)
-        helicopter.position.y = random.randint(0, HEIGHT_WIN - HEIGHT_Earth * 1.2)
+        helicopter.position.y = random.randint(-200, HEIGHT_WIN - HEIGHT_Earth * 1.2)
         barrel.position = tank1.position + (25, -15)
         barrel2.position = tank2.position + (-21, -15)
-        helicopter.scale = 0.35
+        helicopter.scale = h_max_scale / 2
         speedH = random.randint(-1, 1)
         speedT = random.randint(0, 1)
         barrel2.angle = random.randint(2, 5)
@@ -605,7 +607,7 @@ while True:
         hit = 0
 
     """Стрельба вертолета"""
-    if helicopter.position.x < 800:
+    if helicopter.position.x < WIDTH_WIN:
         if salvoH == 0 and expH == 0 and expH1 == 0 and hit == 0:
             bullet_box.add(bullet)
             bullet.position.x = helicopter.position.x
