@@ -233,9 +233,7 @@ class Earth(pg.sprite.Sprite):
         self.index = 0  # первый кадр (костюм)
         self.image = self.images[self.index]
 
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        self.rect = self.image.get_rect(topleft=(x, y))
 
     def update(self):
         self.rect.x -= speed
