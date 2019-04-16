@@ -255,11 +255,11 @@ class Stars:
         self.speed = random.randint(1, 3)
         self.STARS_SIZE = random.randint(8, 16)
         self.image_filename = 'Image/star16.png'
-        self.image = pg.image.load(self.image_filename).convert_alpha()
-        self.image = pg.transform.scale(self.image, (self.STARS_SIZE, self.STARS_SIZE))
+        self.img = pg.image.load(self.image_filename)
+        self.image = pg.transform.scale(self.img, (self.STARS_SIZE, self.STARS_SIZE))
 
     def move_star(self):
-        self.x = self.x - self.speed
+        self.x -= self.speed
         if self.x < 0:
             self.x = WIDTH_WIN
 
