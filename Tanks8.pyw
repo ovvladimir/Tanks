@@ -3,19 +3,18 @@ import random
 import os
 import sys
 
+os.environ['SDL_VIDEO_CENTERED'] = '1'
+
 # print(f'Версия Pygame {pg.version.ver}')
 pg.init()
 SIZE_WINDOW = WIDTH_WIN, HEIGHT_WIN = 960, 720
 BACKGROUND_COLOR = (100, 0, 255)
-screen = pg.display.set_mode(SIZE_WINDOW)
 pg.display.set_caption('Tanks8')
+screen = pg.display.set_mode(SIZE_WINDOW)
 
 """Шрифт"""
 info_string = pg.Surface((WIDTH_WIN, 30))
 text_font = pg.font.SysFont('Arial', 24, True, True)
-
-"""Звук"""
-pg.mixer.pre_init(44100, -16, 2, 1024)
 
 FPS = 120
 clock = pg.time.Clock()
@@ -50,10 +49,11 @@ class Menu:
 
     def menu(self):
         global e
+        pg.mouse.set_visible(True)
         point = 0
         col = 250
         col_block = 0
-        fire_block = 0
+        fire_block = 1 if int(life) <= 0 else 0
         text_color = (250, 250, 250)
         tx = WIDTH_WIN
         tx_min = -330
@@ -65,19 +65,20 @@ class Menu:
         helicopter.scale = h_max_scale
         helicopter.position.x = 750
         helicopter.position.y = 150
-        barrel.position.x = tank1.position.x + 25
-        barrel.position.y = tank1.position.y - 15
-        bullet.position = helicopter.position + (0, 30)
+        barrel.position = tank1.position + (25, -15)
+        barrel_x = barrel.position.x + images2[0].get_width() * barrel.scale / 1.4
+        barrel_y = barrel.position.y - images2[0].get_height() * barrel.scale / 1.4
+        fire.position.x = barrel_x
+        fire.position.y = barrel_y
         barrel.angle = -10
         fire.angle = barrel.angle
         helicopter.angle = 180
         bullet.angle = helicopter.angle
-        salvoH2 = 0
-        salvoT2 = 0
-        time_fire = 0
-        menu_box = pg.sprite.Group(helicopter, barrel, tank1, mouseMenu)
-        if int(life) <= 0:
-            fire_block = 1
+        bullet.position.x = -1
+        tf = 0
+        time_fire = 20
+
+        menu_box = pg.sprite.Group(bullet, helicopter, barrel, tank1, mouseMenu)
 
         font_menu = pg.font.SysFont('Arial', 96, True, True)
         font_menu2 = pg.font.SysFont('Arial', 24, True, True)
@@ -125,9 +126,11 @@ class Menu:
                     point = b[5]
             for e in pg.event.get():
                 if e.type == pg.QUIT:
+                    runMenu = False
                     sys.exit(0)
                 if e.type == pg.KEYDOWN:
                     if e.key == pg.K_ESCAPE:
+                        runMenu = False
                         sys.exit(0)
                     if e.key == pg.K_UP:
                         if point > 0:
@@ -137,43 +140,44 @@ class Menu:
                             point += 1
                     elif e.key == pg.K_RETURN:  # возврвт каретки (ENTER)
                         if point == 0 and fire_block == 0:
+                            helicopter.position.x = WIDTH_WIN * 2
+                            helicopter.scale = h_max_scale / 2
+                            tank1.position.x = -200
+                            pg.mouse.set_visible(False)
                             runMenu = False
                         elif point == 1:
+                            runMenu = False
                             sys.exit(0)
             if e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
                 if point == 0 and fire_block == 0:
                     helicopter.position.x = WIDTH_WIN * 2
                     helicopter.scale = h_max_scale / 2
                     tank1.position.x = -200
+                    pg.mouse.set_visible(False)
                     runMenu = False
                 elif point == 1:
+                    runMenu = False
                     sys.exit(0)
 
-            if salvoH2 == 0:
-                bullet.position.x = helicopter.position.x
-                bullet.position.y = helicopter.position.y + 30
-                bullet.velocity = pg.math.Vector2(-10, 0)
-                salvoH2 = 1
-            elif not bullet.rect.colliderect(helicopter.rect):
-                menu_box.add(bullet)
-                if bullet.position.x < 0:
-                    bullet.velocity = (0, 0)
-                    menu_box.remove(bullet)
-                    salvoH2 = 0
+            bullet.velocity = pg.math.Vector2(-15, 0)
+            if bullet.position.x < 0:
+                bullet.position.x = helicopter.position.x - h_width * helicopter.scale / 2.0
+                bullet.position.y = helicopter.position.y + h_height * helicopter.scale / 2.5
 
             if fire_block == 0:
-                if salvoT2 == 0:
-                    fire.position.x = barrel.position.x
-                    fire.position.y = barrel.position.y
-                    fire.velocity = pg.math.Vector2(1, 0).rotate(-10)
-                    time_fire = 0
-                    salvoT2 = 1
-                elif not fire.rect.colliderect(barrel.rect):
-                    menu_box.add(fire)
-                    time_fire += 1
-                    if time_fire > 5:
-                        menu_box.remove(fire)
-                        salvoT2 = 0
+                if tf == 1:
+                    fire.velocity = pg.math.Vector2(5, 0).rotate(-10)
+                    time_fire += 2
+                    if time_fire > 20:
+                        fire.kill()
+                        tf = 0
+                elif tf == 0:
+                    fire.position.x = barrel_x
+                    fire.position.y = barrel_y
+                    time_fire -= 1
+                    if time_fire < 0:
+                        menu_box.add(fire)
+                        tf = 1
 
             if fire_block == 1:
                 running_line = font_menu.render('GAME OVER', 1, (col, 250, 250))
@@ -301,25 +305,12 @@ class Sprite(pg.sprite.Sprite):
         self.velocity = pg.math.Vector2().rotate(angle)
         self.position = pg.math.Vector2(x, y)
 
-    def render(self):
+    def update(self):
         images = [pg.transform.rotozoom(obj2, -self.angle, self.scale) for obj2 in self.images]
         self.image = images[0]
         self.position += self.velocity
         self.rect.center = self.position
         self.rect = self.image.get_rect(center=self.rect.center)
-
-    def update(self):
-        mouseMenu.render()
-        bullet.render()
-        fire.render()
-
-        fire2.render()
-        shell.render()
-        shell2.render()
-
-        sight.render()
-        barrel.render()
-        barrel2.render()
 
 
 class Burn(pg.sprite.Sprite):
@@ -360,18 +351,17 @@ def gravitation():
 stars = []
 initialize_stars(STARS_MAX, stars)
 
-blocking = 0
-salvoT = 0
-salvoH = 0
+salvoT = False
+salvoT2 = False
 speedT = 0
 speedH = random.randint(-1, 1)
 time_fire1 = 0
 time_fire2 = 0
-expT = 0
-expT1 = 0
-expH = 0
-expH1 = 0
-hit = 0
+expT = False
+expT1 = False
+expH = False
+expH1 = False
+hit = False
 
 images0 = load_images(path='Image/Earth')
 earth = Earth(x=0, y=HEIGHT_WIN - images0[0].get_height(), images=images0)
@@ -381,17 +371,18 @@ earth_clone = Earth(x=WIDTH_WIN, y=HEIGHT_WIN - images0[0].get_height(),
 images1 = load_images(path='Image/Tank1')
 tank1_pos = 196
 tank_width = images1[0].get_width()
-tank1 = SpriteAnimation(x=-tank1_pos, y=0, dx=False, dy=False, images=images1,
+tank1 = SpriteAnimation(x=150, y=450, dx=False, dy=False, images=images1,
                         angle=0, scale=1.7)
 
 images2 = load_images(path='Image/Дуло1')
-barrel = Sprite(x=tank1.position.x + 25, y=tank1.position.y - 15, dx=False, dy=False,
+barrel = Sprite(x=tank1.position.x, y=tank1.position.y, dx=False, dy=False,
                 images=images2, angle=-10, scale=1.2)
 
 images3 = load_images(path='Image/Helicopter')
 h_max_scale = 0.6
+h_width = images3[0].get_width()
 h_height = images3[0].get_height()
-helicopter = SpriteAnimation(x=WIDTH_WIN*2, y=0, dx=False, dy=True, images=images3,
+helicopter = SpriteAnimation(x=750, y=150, dx=False, dy=True, images=images3,
                              angle=180, scale=h_max_scale/2)
 
 images4 = load_images(path='Image/Tank2')
@@ -399,14 +390,17 @@ tank2 = SpriteAnimation(x=2000, y=0, dx=False, dy=False, images=images4,
                         angle=0, scale=1.7)
 
 images5 = load_images(path='Image/Дуло2')
-barrel2 = Sprite(x=2000, y=0, dx=False, dy=False, images=images5, angle=5, scale=1.2)
+barrel2 = Sprite(x=tank2.position.x, y=tank2.position.y, dx=False, dy=False,
+                 images=images5, angle=5, scale=1.2)
+barrel2_pos = (images5[0].get_width() * barrel2.scale / 2, 
+               images5[0].get_height() * barrel2.scale / 4)
 
 images6 = load_images(path='Image/Прицел')
 sight = Sprite(x=0, y=0, dx=False, dy=False, images=images6, angle=False, scale=0.5)
 
 images7 = load_images(path='Image/Снаряд')
 shell = Sprite(x=-100, y=0, dx=False, dy=False, images=images7, angle=0, scale=0.4)
-shell2 = Sprite(x=1000, y=0, dx=True, dy=False, images=images7, angle=0, scale=0.4)
+shell2 = Sprite(x=WIDTH_WIN*2, y=0, dx=True, dy=False, images=images7, angle=0, scale=0.4)
 
 images8 = load_images(path='Image/Взрыв')
 explosion = SpriteAnimation(x=-200, y=-200, dx=False, dy=False, images=images8,
@@ -415,13 +409,13 @@ explosion2 = SpriteAnimation(x=-200, y=-200, dx=False, dy=False, images=images8,
                              angle=False, scale=0.01)
 
 images9 = load_images(path='Image/fire')
-fire = Sprite(x=-300, y=-300, dx=False, dy=False, images=images9, angle=0, scale=1.5)
+fire = Sprite(x=-100, y=-100, dx=False, dy=False, images=images9, angle=0, scale=1.5)
 
-fire2 = Sprite(x=-300, y=-300, dx=True, dy=False, images=images9, angle=0, scale=1.5)
+fire2 = Sprite(x=-100, y=-100, dx=True, dy=False, images=images9, angle=0, scale=1.5)
 
 images10 = load_images(path='Image/Bullet')
-bullet = Sprite(x=-500, y=0, dx=False, dy=False, images=images10,
-                angle=0, scale=1.0)
+bullet = Sprite(x=helicopter.position.x, y=helicopter.position.y, dx=False, dy=False,
+                images=images10, angle=0, scale=1.0)
 
 images11 = load_images(path='Image/Здоровье')
 health = Health(images=images11)
@@ -440,6 +434,7 @@ all_sprites = pg.sprite.LayeredUpdates(health, earth, earth_clone)
 all_sprites.add(other_box, layer=2)
 all_sprites.add(player_box, layer=3)
 all_sprites.add(sight_box, layer=5)
+all_sprites.add(bullet_box, layer=0)
 
 """Пункты меню"""
 menu_points = [(330, 250, 'GAME', (250, 250, 30), (250, 30, 250), 0),
@@ -448,14 +443,17 @@ game = Menu(points=menu_points)
 game.menu()
 
 """Звук"""
+pg.mixer.pre_init(44100, -16, 2, 1024)
+soundH = pg.mixer.Sound('Sound/Выстрел Н.wav')
+soundH.set_volume(0.3)
 soundT1 = pg.mixer.Sound('Sound/Выстрел Т1.wav')
 soundT2 = pg.mixer.Sound('Sound/Выстрел Т2.wav')
-soundH = pg.mixer.Sound('Sound/Выстрел Н.wav')
 """___________________________________________игровой цикл__________________________________________________"""
 while True:
     clock.tick(FPS)
     for e in pg.event.get():
         if e.type == pg.QUIT or e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE:
+            pg.quit()
             sys.exit(0)
 
     """Танк1"""
@@ -491,24 +489,85 @@ while True:
     barrel2.position = tank2.position + (-20, -15)
 
     """Прицел"""
-    pg.mouse.set_visible(False)
     sight.position = pg.mouse.get_pos()
 
-    """Снаряд"""
+    """Залп танка 1"""
+    key = pg.key.get_pressed()
+    if key[pg.K_SPACE] and tank1.position.x >= tank1_pos and hit is False and salvoT is False:
+        shell_box.add(shell)
+        fire.position = barrel.position
+        shell.position = barrel.position + (0, -1)
+        fire.angle = barrel.angle
+        shell.angle = barrel.angle
+        fire.velocity = pg.math.Vector2(15, 0).rotate(fire.angle)
+        shell.velocity = pg.math.Vector2(15, 0).rotate(shell.angle)
+        salvoT = True
+        time_fire1 = 0
+        soundH.stop()
+        soundT1.play()
+    elif not fire.rect.colliderect(barrel.rect):
+        all_sprites.add(shell_box, layer=0)
+        all_sprites.add(fire, layer=1)
+        time_fire1 += 1
+        if time_fire1 > 2:
+            all_sprites.remove(fire)
+            fire.velocity = (0, 0)
+            fire.position = barrel.position
+    shell.update()
+    fire.update()
+
+    """Залп танка 2"""
+    if tank2.position.x > WIDTH_WIN:
+        time_fire2 = 0
+    elif tank2.position.x < random.randrange(500, 701, 10):
+        if time_fire2 == 0:
+            salvoT2 = True
+            all_sprites.add(fire2, layer=1)
+            shell2_box.add(shell2)
+            all_sprites.add(shell2, layer=0)
+            shell2.update()
+            fire2.position = barrel2.position - barrel2_pos
+            shell2.position = barrel2.position - barrel2_pos
+            fire2.angle = barrel2.angle
+            shell2.angle = barrel2.angle
+            fire2.velocity = pg.math.Vector2(-15-speed-speedT, 0).rotate(fire2.angle)
+            shell2.velocity = pg.math.Vector2(-15-speed-speedT, 0).rotate(shell2.angle)
+            soundH.stop()
+            soundT2.play()
+    elif salvoT2:
+        time_fire2 += 1
+        if time_fire2 > 2:
+            all_sprites.remove(fire2)
+            salvoT2 = False
+
+    """Стрельба вертолета"""
+    if helicopter.position.x < WIDTH_WIN:
+        bullet.angle = helicopter.angle - 180
+        bullet.velocity = pg.math.Vector2(-15-speed-speedH, 0).rotate(bullet.angle)
+        soundH.play()
+    if bullet.position.x < 0 or helicopter.position.x > WIDTH_WIN \
+            or bullet.rect.colliderect(earth.rect) or bullet.rect.colliderect(earth_clone.rect) \
+            or expH1:
+        bullet.velocity = (0, 0)
+        bullet.position.x = helicopter.position.x - h_width * helicopter.scale / 2.0
+        bullet.position.y = helicopter.position.y + h_height * helicopter.scale / 1.5
+        expH1 = False
+
+    """Снаряды - collision"""
     if pg.sprite.spritecollide(tank2, shell_box, True):
         print('снаряд - T2')
         killed += 1
         life += 0.2
         all_sprites.add(explosion, layer=4)
-        expT = 1
+        expT = True
     elif pg.sprite.spritecollide(helicopter, shell_box, True, pg.sprite.collide_rect_ratio(.4)):
         print('снаряд - H')
         killed += 1
         life += 0.2
         all_sprites.add(explosion, layer=4)
-        expH = 1
+        expH = True
     elif shell.rect.colliderect(earth.rect) \
-            or shell.rect.colliderect(earth_clone.rect) or shell.position.x >= WIDTH_WIN:
+            or shell.rect.colliderect(earth_clone.rect) or shell.position.x >= WIDTH_WIN - 10:
         # print('снаряд - E')
         all_sprites.remove(shell_box)
         all_sprites.add(explosion, layer=4)
@@ -517,7 +576,7 @@ while True:
             explosion.position = shell.position
             explosion.scale += 0.01
         else:
-            blocking = 0
+            salvoT = False
             shell.velocity = (0, 0)
             shell.position = barrel.position + (0, -1)
             fire.velocity = (0, 0)
@@ -528,14 +587,37 @@ while True:
         life -= 1
         print('H-T1')
         all_sprites.remove(other_box)
-        hit = 1
+        hit = True
     elif pg.sprite.spritecollide(tank2, player_box, True):
         life -= 1
         print('T1-T2')
         all_sprites.remove(other_box)
-        hit = 1
+        hit = True
+    elif pg.sprite.spritecollideany(tank1, bullet_box):
+        life -= 0.2
+        expH1 = True
+        print('пули - Т1')
+    elif shell2.position.x < 1:
+        explosion2.position = (0, shell2.position.y)
+        shell2.kill()
+        expT1 = True
+    elif pg.sprite.spritecollide(tank1, shell2_box, True):
+        explosion2.position = tank1.position
+        life -= 0.2
+        expT1 = True
+        print('снаряд2 - Т1')
 
-    if expT == 1:
+    if expT1:
+        shell2.position.x = WIDTH_WIN * 2
+        shell2.velocity = (0, 0)
+        all_sprites.add(explosion2, layer=4)
+        if explosion2.scale < 0.2:
+            explosion2.scale += 0.01
+        else:
+            explosion2.scale = 0.01
+            all_sprites.remove(explosion2)
+            expT1 = False
+    if expT:
         if explosion.scale < 0.2:
             shell.velocity = (0, 0)
             tank2.position.x += speed + speedT
@@ -543,16 +625,17 @@ while True:
             explosion.scale += 0.01
         else:
             tank2.position.x = WIDTH_WIN * random.randint(2, 3)
-            barrel2.position = tank2.position
+            barrel2.angle = random.randint(0, 4)
             explosion.scale = 0.01
             shell.position = barrel.position + (0, -1)
             all_sprites.remove(explosion)
             all_sprites.remove(shell_box)
             speedT = random.randint(0, 1)
-            barrel2.angle = random.randint(2, 5)
-            blocking = 0
-            expT = 0
-    if expH == 1:
+            salvoT = False
+            expT = False
+    if expH:
+        bullet.position.x = WIDTH_WIN * 2
+        bullet.velocity = (0, 0)
         if explosion.scale < 0.2:
             shell.velocity = (0, 0)
             helicopter.velocity = (-1, 2)
@@ -560,17 +643,18 @@ while True:
             explosion.scale += 0.01
         else:
             helicopter.position.x = WIDTH_WIN * random.randint(2, 3)
-            helicopter.position.y = random.randint(-200, HEIGHT_WIN - HEIGHT_Earth * 1.2)
+            helicopter.position.y = random.randint(-200, HEIGHT_WIN - HEIGHT_Earth * 1.5)
             explosion.scale = 0.01
             shell.position = barrel.position + (0, -1)
             all_sprites.remove(explosion)
             all_sprites.remove(shell_box)
             helicopter.scale = h_max_scale / 2
             speedH = random.randint(-1, 1)
-            blocking = 0
-            expH = 0
-    if hit == 1:
-        all_sprites.remove(bullet_box)
+            salvoT = False
+            expH = False
+    if hit:
+        bullet.position.x = WIDTH_WIN * 2
+        bullet.velocity = (0, 0)
         all_sprites.remove(explosion)
         all_sprites.remove(explosion2)
         all_sprites.remove(shell_box)
@@ -583,131 +667,32 @@ while True:
         tank1.position.x = -tank_width * 5
         tank2.position.x = WIDTH_WIN * random.randint(2, 3)
         helicopter.position.x = WIDTH_WIN * random.randint(2, 3)
-        helicopter.position.y = random.randint(-200, HEIGHT_WIN - HEIGHT_Earth * 1.2)
+        helicopter.position.y = random.randint(-200, HEIGHT_WIN - HEIGHT_Earth * 1.5)
         barrel.position = tank1.position + (25, -15)
         barrel2.position = tank2.position + (-21, -15)
+        barrel2.angle = random.randint(0, 4)
         helicopter.scale = h_max_scale / 2
         speedH = random.randint(-1, 1)
         speedT = random.randint(0, 1)
-        barrel2.angle = random.randint(2, 5)
         fire.velocity = (0, 0)
         fire.position = barrel.position
         shell2.velocity = (0, 0)
         shell2.position = barrel2.position
         fire2.velocity = (0, 0)
-        fire2.position = barrel.position
+        fire2.position = barrel2.position
         shell.velocity = (0, 0)
         shell.position = barrel.position + (0, -1)
-        bullet.velocity = (0, 0)
-        blocking = 0
-        salvoT = 0
-        salvoH = 0
-        hit = 0
-
-    """Стрельба вертолета"""
-    if helicopter.position.x < WIDTH_WIN:
-        if salvoH == 0 and expH == 0 and expH1 == 0 and hit == 0:
-            bullet_box.add(bullet)
-            bullet.position.x = helicopter.position.x
-            bullet.position.y = helicopter.position.y + h_height * helicopter.scale / 3.0
-            bullet.angle = helicopter.angle - 180
-            bullet.velocity = pg.math.Vector2(-10, 0).rotate(bullet.angle)
-            salvoH = 1
-            soundH.play()
-        elif not bullet.rect.colliderect(helicopter.rect):
-            all_sprites.add(bullet_box, layer=0)
-
-    """Пули - collision"""
-    if expH1 == 1 or bullet.position.x < 0 \
-            or bullet.rect.colliderect(earth.rect) or bullet.rect.colliderect(earth_clone.rect):
-        bullet.velocity = (0, 0)
-        bullet.position.x = helicopter.position.x
-        bullet.position.y = helicopter.position.y + h_height * helicopter.scale / 3.0
-        all_sprites.remove(bullet_box)
-        expH1 = 0
-        salvoH = 0
-    elif pg.sprite.spritecollide(tank1, bullet_box, True):
-        life -= 0.2
-        expH1 = 1
-        print('пули - Т1')
-
-    """Залп танка_2"""
-    if tank2.position.x < 700 and barrel2.position.x > 500:
-        if salvoT == 0 and expT == 0 and expT1 == 0 and hit == 0:
-            shell2_box.add(shell2)
-            fire2.position = barrel2.position
-            shell2.position = barrel2.position
-            fire2.angle = barrel2.angle
-            shell2.angle = barrel2.angle
-            fire2.velocity = pg.math.Vector2(-5, 0).rotate(fire2.angle)
-            shell2.velocity = pg.math.Vector2(-5, 0).rotate(shell2.angle)
-            time_fire2 = 0
-            salvoT = 1
-            soundT2.play()
-        elif not shell2.rect.colliderect(barrel2.rect):
-            all_sprites.add(shell2_box, layer=0)
-            all_sprites.add(fire2, layer=1)
-            time_fire2 += 1
-            if time_fire2 > 2:
-                all_sprites.remove(fire2)
-
-    """Снаряд_2 - collision"""
-    if pg.sprite.spritecollide(tank1, shell2_box, True):
-        explosion2.position = tank1.position
-        expT1 = 1
-        life -= 0.2
-        print('снаряд2 - Т1')
-    elif shell2.position.x < 1:
-        explosion2.position = (0, shell2.position.y)
-        expT1 = 1
-    elif expT1 == 1 and hit == 0:
-        all_sprites.add(explosion2, layer=4)
-        if explosion2.scale < 0.2:
-            explosion2.scale += 0.01
-        else:
-            explosion2.scale = 0.01
-            all_sprites.remove(explosion2)
-            expT1 = 0
-    if expT1 == 1:
-        fire2.velocity = (0, 0)
-        fire2.position = barrel2.position
-        shell2.velocity = (0, 0)
-        shell2.position = barrel2.position
-        all_sprites.remove(shell2_box)
-        salvoT = 0
-
-    """Залп танка_1"""
-    key = pg.key.get_pressed()
-    if key[pg.K_SPACE] and blocking == 0 and tank1.position.x >= tank1_pos and hit == 0:
-        shell_box.add(shell)
-        fire.position = barrel.position
-        shell.position = barrel.position + (0, -1)
-        fire.angle = barrel.angle
-        shell.angle = barrel.angle
-        fire.velocity = pg.math.Vector2(10, 0).rotate(fire.angle)
-        shell.velocity = pg.math.Vector2(10, 0).rotate(shell.angle)
-        blocking = 1
-        time_fire1 = 0
-        soundT1.play()
-    elif key[pg.K_m]:
-        pg.mouse.set_visible(True)
-        menu_points[0] = (330, 250, 'PAUSE', (250, 250, 30), (250, 30, 250), 0)
-        game.menu()
-    elif not fire.rect.colliderect(barrel.rect):
-        all_sprites.add(shell_box, layer=0)
-        all_sprites.add(fire, layer=1)
-        time_fire1 += 1
-        if time_fire1 > 2:
-            all_sprites.remove(fire)
-            fire.velocity = (0, 0)
-            fire.position = barrel.position
+        salvoT = False
+        hit = False
 
     if life >= 10:
         life = 10
     elif int(life) <= 0:
         life = 0
-        pg.mouse.set_visible(True)
         menu_points[0] = (330, 250, 'CLICK', (250, 250, 30), (250, 250, 30), 0)
+        game.menu()
+    elif key[pg.K_m]:
+        menu_points[0] = (330, 250, 'PAUSE', (250, 250, 30), (250, 30, 250), 0)
         game.menu()
 
     screen.fill(BACKGROUND_COLOR)
