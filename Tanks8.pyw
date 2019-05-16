@@ -81,15 +81,16 @@ class Menu:
         menu_box = pg.sprite.Group(bullet, helicopter, barrel, tank1, mouseMenu)
 
         font_menu = pg.font.SysFont('Arial', 96, True, True)
+        font_menu_width = font_menu.size('GAME')[0]
         font_menu2 = pg.font.SysFont('Arial', 24, True, True)
         text1 = font_menu2.render("shoot enemies, score points", 1, text_color)
         text1_pos = (600, 20)
-        text2 = font_menu2.render("Сейчас очков: " + str(killed), 1, text_color)
+        text2 = font_menu2.render(f"Scored points: {killed}", 1, text_color)
         text2_pos = (20, 20)
         if not life == 11:
-            text3 = font_menu2.render("Доступно жизней: " + str(int(life)), 1, text_color)
+            text3 = font_menu2.render("Available lives: " + str(int(life)), 1, text_color)
         else:
-            text3 = font_menu2.render("Доступно жизней: 10", 1, text_color)
+            text3 = font_menu2.render("Available lives: 10", 1, text_color)
         text3_pos = (20, 80)
         text4 = font_menu2.render("shot of the tank -", 1, text_color)
         text4_pos = (690, 425)
@@ -106,7 +107,7 @@ class Menu:
             d = open('Record/record.dat', 'w')
             d.write(str(record))
             d.close()
-        text8 = font_menu2.render("Текущий рекорд: " + str(record), 1, text_color)
+        text8 = font_menu2.render(f"Current record: {record}", 1, text_color)
         text8_pos = (20, 50)
 
         burn_img = pg.image.load("Image/Костер/1.png").convert(24)
@@ -122,7 +123,7 @@ class Menu:
 
             m_pos = pg.mouse.get_pos()
             for b in self.points:
-                if b[0] < m_pos[0] < b[0] + 280 and m_pos[1] > b[1]:  # 280 - ширина букв
+                if b[0] < m_pos[0] < b[0] + font_menu_width and m_pos[1] > b[1]:
                     point = b[5]
             for e in pg.event.get():
                 if e.type == pg.QUIT:
@@ -183,7 +184,7 @@ class Menu:
                 running_line = font_menu.render('GAME OVER', 1, (col, 250, 250))
                 tx_min = -570
             else:
-                running_line = font_menu.render('ТАНКИ', 1, (col, 250, 250))
+                running_line = font_menu.render('TANKS', 1, (col, 250, 250))
             text7_pos = (tx, 580)
             tx -= 2
             if tx == tx_min:
@@ -701,8 +702,8 @@ while True:
         i.draw_star()
 
     info_string.fill((90, 0, 255))
-    info_string.blit(text_font.render(f'Очки: {killed}', 1, (255, 255, 255)), (10, 2))
-    info_string.blit(text_font.render(f'Жизни: {int(life)}', 1, (255, 255, 255)), (840, 2))
+    info_string.blit(text_font.render(f'Points: {killed}', 1, (255, 255, 255)), (10, 2))
+    info_string.blit(text_font.render(f'Life: {int(life)}', 1, (255, 255, 255)), (868, 2))
     screen.blit(info_string, (0, 0))
 
     all_sprites.update()
