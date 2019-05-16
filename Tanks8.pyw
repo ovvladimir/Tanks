@@ -392,7 +392,7 @@ tank2 = SpriteAnimation(x=2000, y=0, dx=False, dy=False, images=images4,
 images5 = load_images(path='Image/Дуло2')
 barrel2 = Sprite(x=tank2.position.x, y=tank2.position.y, dx=False, dy=False,
                  images=images5, angle=5, scale=1.2)
-barrel2_pos = (images5[0].get_width() * barrel2.scale / 2, 
+barrel2_pos = (images5[0].get_width() * barrel2.scale / 2,
                images5[0].get_height() * barrel2.scale / 4)
 
 images6 = load_images(path='Image/Прицел')
@@ -625,7 +625,7 @@ while True:
             explosion.scale += 0.01
         else:
             tank2.position.x = WIDTH_WIN * random.randint(2, 3)
-            barrel2.angle = random.randint(0, 4)
+            barrel2.angle = random.randint(1, 5)
             explosion.scale = 0.01
             shell.position = barrel.position + (0, -1)
             all_sprites.remove(explosion)
@@ -670,7 +670,7 @@ while True:
         helicopter.position.y = random.randint(-200, HEIGHT_WIN - HEIGHT_Earth * 1.5)
         barrel.position = tank1.position + (25, -15)
         barrel2.position = tank2.position + (-21, -15)
-        barrel2.angle = random.randint(0, 4)
+        barrel2.angle = random.randint(1, 5)
         helicopter.scale = h_max_scale / 2
         speedH = random.randint(-1, 1)
         speedT = random.randint(0, 1)
