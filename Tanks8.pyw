@@ -48,7 +48,7 @@ class Menu:
                 surface.blit(font.render(a[2], 1, a[3]), (a[0], a[1]))
 
     def menu(self):
-        global e
+        global e, runMenu
         pg.mouse.set_visible(True)
         point = 0
         col = 250
