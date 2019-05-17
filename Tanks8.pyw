@@ -436,6 +436,7 @@ all_sprites.add(other_box, layer=2)
 all_sprites.add(player_box, layer=3)
 all_sprites.add(sight_box, layer=5)
 all_sprites.add(bullet_box, layer=0)
+all_sprites.add(shell2, layer=0)
 
 """Пункты меню"""
 menu_points = [(330, 250, 'GAME', (250, 250, 30), (250, 30, 250), 0),
@@ -520,13 +521,10 @@ while True:
     """Залп танка 2"""
     if tank2.position.x > WIDTH_WIN:
         time_fire2 = 0
-    elif tank2.position.x < random.randrange(500, 701, 10):
+    if tank2.position.x < random.randrange(500, 701, 10):
         if time_fire2 == 0:
             salvoT2 = True
             all_sprites.add(fire2, layer=1)
-            shell2_box.add(shell2)
-            all_sprites.add(shell2, layer=0)
-            shell2.update()
             fire2.position = barrel2.position - barrel2_pos
             shell2.position = barrel2.position - barrel2_pos
             fire2.angle = barrel2.angle
@@ -535,7 +533,7 @@ while True:
             shell2.velocity = pg.math.Vector2(-15-speed-speedT, 0).rotate(shell2.angle)
             soundH.stop()
             soundT2.play()
-    elif salvoT2:
+    if salvoT2:
         time_fire2 += 1
         if time_fire2 > 2:
             all_sprites.remove(fire2)
@@ -569,7 +567,6 @@ while True:
         expH = True
     elif shell.rect.colliderect(earth.rect) \
             or shell.rect.colliderect(earth_clone.rect) or shell.position.x >= WIDTH_WIN - 10:
-        # print('снаряд - E')
         all_sprites.remove(shell_box)
         all_sprites.add(explosion, layer=4)
         if explosion.scale < 0.2:
@@ -600,9 +597,8 @@ while True:
         print('пули - Т1')
     elif shell2.position.x < 1:
         explosion2.position = (0, shell2.position.y)
-        shell2.kill()
         expT1 = True
-    elif pg.sprite.spritecollide(tank1, shell2_box, True):
+    elif pg.sprite.spritecollideany(tank1, shell2_box):
         explosion2.position = tank1.position
         life -= 0.2
         expT1 = True
@@ -659,7 +655,6 @@ while True:
         all_sprites.remove(explosion)
         all_sprites.remove(explosion2)
         all_sprites.remove(shell_box)
-        all_sprites.remove(shell2_box)
         all_sprites.remove(fire)
         all_sprites.remove(fire2)
         all_sprites.add(other_box, layer=2)
@@ -678,9 +673,7 @@ while True:
         fire.velocity = (0, 0)
         fire.position = barrel.position
         shell2.velocity = (0, 0)
-        shell2.position = barrel2.position
-        fire2.velocity = (0, 0)
-        fire2.position = barrel2.position
+        shell2.position.x = WIDTH_WIN * 2
         shell.velocity = (0, 0)
         shell.position = barrel.position + (0, -1)
         salvoT = False
