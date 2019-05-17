@@ -542,14 +542,14 @@ while True:
     """Стрельба вертолета"""
     if helicopter.position.x < WIDTH_WIN:
         bullet.angle = helicopter.angle - 180
-        bullet.velocity = pg.math.Vector2(-15-speed-speedH, 0).rotate(bullet.angle)
+        bullet.velocity = pg.math.Vector2(-15-speed-speedH, 0.3).rotate(bullet.angle)
         soundH.play()
     if bullet.position.x < 0 or helicopter.position.x > WIDTH_WIN \
             or bullet.rect.colliderect(earth.rect) or bullet.rect.colliderect(earth_clone.rect) \
             or expH1:
         bullet.velocity = (0, 0)
         bullet.position.x = helicopter.position.x - h_width * helicopter.scale / 2.0
-        bullet.position.y = helicopter.position.y + h_height * helicopter.scale / 1.5
+        bullet.position.y = helicopter.position.y + h_height * helicopter.scale / 1.4
         expH1 = False
 
     """Снаряды - collision"""
