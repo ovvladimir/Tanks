@@ -25,6 +25,7 @@ HEIGHT_Earth = 290
 speed = 8
 life = 11
 killed = 0
+kil = str(killed)
 
 
 def load_images(path):
@@ -352,6 +353,7 @@ def gravitation():
 stars = []
 initialize_stars(STARS_MAX, stars)
 
+salvo = 0
 salvoT = False
 salvoT2 = False
 speedT = 0
@@ -457,6 +459,9 @@ while True:
         if e.type == pg.QUIT or e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE:
             pg.quit()
             sys.exit(0)
+        elif e.type == pg.MOUSEBUTTONDOWN:
+            if e.button == 1:
+                salvo = 1
 
     """Танк1"""
     if tank1.position.x < tank1_pos:
@@ -495,7 +500,7 @@ while True:
 
     """Залп танка 1"""
     key = pg.key.get_pressed()
-    if key[pg.K_SPACE] and tank1.position.x >= tank1_pos and hit is False and salvoT is False:
+    if (key[pg.K_SPACE] or salvo == 1) and tank1.position.x >= tank1_pos and hit is False and salvoT is False:
         shell_box.add(shell)
         fire.position = barrel.position
         shell.position = barrel.position + (0, -1)
@@ -517,6 +522,7 @@ while True:
             fire.position = barrel.position
     shell.update()
     fire.update()
+    salvo = 0
 
     """Залп танка 2"""
     if tank2.position.x > WIDTH_WIN:
@@ -592,7 +598,13 @@ while True:
         all_sprites.remove(other_box)
         hit = True
     elif pg.sprite.spritecollideany(tank1, bullet_box):
-        life -= 0.2
+        if killed <= 100:
+            life -= 0.2
+        elif 100 < killed < 1000:
+            kil = float(f'0.{(str(killed))[0]}')
+            life -= 0.2 + kil
+        else:
+            life -= 1
         expH1 = True
         print('пули - Т1')
     elif shell2.position.x < 1:
@@ -600,7 +612,13 @@ while True:
         expT1 = True
     elif pg.sprite.spritecollideany(tank1, shell2_box):
         explosion2.position = tank1.position
-        life -= 0.2
+        if killed <= 100:
+            life -= 0.2
+        elif 100 < killed < 1000:
+            kil = str(killed)
+            life -= 0.2 * (int(kil[0]) + 1)
+        else:
+            life -= 2
         expT1 = True
         print('снаряд2 - Т1')
 
