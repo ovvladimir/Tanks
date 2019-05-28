@@ -447,7 +447,6 @@ game = Menu(points=menu_points)
 game.menu()
 
 """Звук"""
-pg.mixer.pre_init(44100, -16, 2, 1024)
 soundH = pg.mixer.Sound('Sound/Выстрел Н.wav')
 soundH.set_volume(0.3)
 soundT1 = pg.mixer.Sound('Sound/Выстрел Т1.wav')
