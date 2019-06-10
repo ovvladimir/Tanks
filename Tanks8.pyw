@@ -21,7 +21,7 @@ clock = pg.time.Clock()
 
 STARS_SIZE = 16
 STARS_MAX = 100
-HEIGHT_Earth = 290
+HEIGHT_Earth = 250
 speed = 8
 life = 11
 killed = 0
@@ -112,7 +112,7 @@ class Menu:
         text8_pos = (20, 50)
 
         burn_img = pg.image.load("Image/Костер/1.png").convert(24)
-        burn_img.set_alpha(160)
+        burn_img.set_alpha(125)
         burn_img.set_colorkey((0, 0, 0))
         images13 = [burn_img.subsurface((0, 0, 141, 237)),
                     burn_img.subsurface((141, 0, 141, 237))]
@@ -184,6 +184,7 @@ class Menu:
             if fire_block == 1:
                 running_line = font_menu.render('GAME OVER', 1, (col, 250, 250))
                 tx_min = -570
+                menu_box.add(burn)
             else:
                 running_line = font_menu.render('TANKS', 1, (col, 250, 250))
             text7_pos = (tx, 580)
@@ -210,8 +211,6 @@ class Menu:
             screen.blit(running_line, text7_pos)
             screen.blit(text8, text8_pos)
 
-            if fire_block == 1:
-                burn.update()
             menu_box.update()
             menu_box.draw(screen)
             pg.display.update()
@@ -326,7 +325,6 @@ class Burn(pg.sprite.Sprite):
     def update(self):
         self.frame += 0.2
         self.image = self.images[int(self.frame % len(self.images))]
-        screen.blit(self.image, (self.rect.x, self.rect.y))
 
 
 def initialize_stars(stars_max, star):
@@ -431,12 +429,11 @@ bullet_box = pg.sprite.Group(bullet)
 shell_box = pg.sprite.Group(shell)
 shell2_box = pg.sprite.Group(shell2)
 player_box = pg.sprite.Group(tank1)
-sight_box = pg.sprite.Group(sight)
 other_box = pg.sprite.Group(helicopter, barrel2, tank2, barrel)
 all_sprites = pg.sprite.LayeredUpdates(health, earth, earth_clone)
 all_sprites.add(other_box, layer=2)
 all_sprites.add(player_box, layer=3)
-all_sprites.add(sight_box, layer=5)
+all_sprites.add(sight, layer=5)
 all_sprites.add(bullet_box, layer=0)
 all_sprites.add(shell2, layer=0)
 
@@ -718,4 +715,5 @@ while True:
 
     all_sprites.update()
     all_sprites.draw(screen)
+
     pg.display.update()
