@@ -16,7 +16,7 @@ screen = pg.display.set_mode(SIZE_WINDOW)
 info_string = pg.Surface((WIDTH_WIN, 30))
 text_font = pg.font.SysFont('Arial', 24, True, True)
 
-FPS = 120
+FPS = 60
 clock = pg.time.Clock()
 
 STARS_SIZE = 16
@@ -120,7 +120,7 @@ class Menu:
 
         runMenu = True
         while runMenu:
-            clock.tick(FPS/2)
+            clock.tick(FPS)
 
             m_pos = pg.mouse.get_pos()
             for b in self.points:
@@ -715,5 +715,5 @@ while True:
 
     all_sprites.update()
     all_sprites.draw(screen)
-
+    pg.display.set_caption(f'Tanks8                      FPS: {int(clock.get_fps())}')
     pg.display.update()
