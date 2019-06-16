@@ -100,9 +100,14 @@ class Menu:
         text6 = font_menu2.render("m button - menu", 1, text_color)
         text6_pos = (70, 300)
 
-        d = open('Record/record.dat', 'r')
-        record = int(d.read())
-        d.close()
+        try:
+            d = open('Record/record.dat', 'r')
+            record = int(d.read())
+            d.close()
+        except FileNotFoundError:
+            with open('Record/record.dat', 'w') as d:
+                record = 0
+                d.write(str(record))
         if record < killed:
             record = killed
             d = open('Record/record.dat', 'w')
@@ -320,7 +325,7 @@ class Burn(pg.sprite.Sprite):
         self.images = images
         self.frame = 0
         self.image = self.images[self.frame]
-        self.rect = self.image.get_rect(center=(x, y-self.image.get_height()/3))
+        self.rect = self.image.get_rect(center=(x, y - self.image.get_height() / 3))
 
     def update(self):
         self.frame += 0.2
@@ -384,7 +389,7 @@ h_max_scale = 0.6
 h_width = images3[0].get_width()
 h_height = images3[0].get_height()
 helicopter = SpriteAnimation(x=750, y=150, dx=False, dy=True, images=images3,
-                             angle=180, scale=h_max_scale/2)
+                             angle=180, scale=h_max_scale / 2.0)
 
 images4 = load_images(path='Image/Tank2')
 tank2 = SpriteAnimation(x=2000, y=0, dx=False, dy=False, images=images4,
@@ -393,15 +398,15 @@ tank2 = SpriteAnimation(x=2000, y=0, dx=False, dy=False, images=images4,
 images5 = load_images(path='Image/Дуло2')
 barrel2 = Sprite(x=tank2.position.x, y=tank2.position.y, dx=False, dy=False,
                  images=images5, angle=5, scale=1.2)
-barrel2_pos = (images5[0].get_width() * barrel2.scale / 2,
-               images5[0].get_height() * barrel2.scale / 4)
+barrel2_pos = (images5[0].get_width() * barrel2.scale / 2.0,
+               images5[0].get_height() * barrel2.scale / 4.0)
 
 images6 = load_images(path='Image/Прицел')
 sight = Sprite(x=0, y=0, dx=False, dy=False, images=images6, angle=False, scale=0.5)
 
 images7 = load_images(path='Image/Снаряд')
 shell = Sprite(x=-100, y=0, dx=False, dy=False, images=images7, angle=0, scale=0.4)
-shell2 = Sprite(x=WIDTH_WIN*2, y=0, dx=True, dy=False, images=images7, angle=0, scale=0.4)
+shell2 = Sprite(x=WIDTH_WIN * 2, y=0, dx=True, dy=False, images=images7, angle=0, scale=0.4)
 
 images8 = load_images(path='Image/Взрыв')
 explosion = SpriteAnimation(x=-200, y=-200, dx=False, dy=False, images=images8,
@@ -531,8 +536,8 @@ while True:
             shell2.position = barrel2.position - barrel2_pos
             fire2.angle = barrel2.angle
             shell2.angle = barrel2.angle
-            fire2.velocity = pg.math.Vector2(-15-speed-speedT, 0).rotate(fire2.angle)
-            shell2.velocity = pg.math.Vector2(-15-speed-speedT, 0).rotate(shell2.angle)
+            fire2.velocity = pg.math.Vector2(-15 - speed - speedT, 0).rotate(fire2.angle)
+            shell2.velocity = pg.math.Vector2(-15 - speed - speedT, 0).rotate(shell2.angle)
             soundH.stop()
             soundT2.play()
     if salvoT2:
@@ -544,7 +549,7 @@ while True:
     """Стрельба вертолета"""
     if helicopter.position.x < WIDTH_WIN:
         bullet.angle = helicopter.angle - 180
-        bullet.velocity = pg.math.Vector2(-15-speed-speedH, 0).rotate(bullet.angle)
+        bullet.velocity = pg.math.Vector2(-15 - speed - speedH, 0).rotate(bullet.angle)
         soundH.play()
     if bullet.position.x < 0 or helicopter.position.x > WIDTH_WIN \
             or bullet.rect.colliderect(earth.rect) or bullet.rect.colliderect(earth_clone.rect) \
