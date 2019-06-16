@@ -97,7 +97,7 @@ class Menu:
         text4_pos = (690, 425)
         text5 = font_menu2.render("left mouse button or space", 1, text_color)
         text5_pos = (630, 455)
-        text6 = font_menu2.render("m button - menu", 1, text_color)
+        text6 = font_menu2.render('"m" key - menu', 1, text_color)
         text6_pos = (70, 300)
 
         try:
