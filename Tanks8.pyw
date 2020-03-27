@@ -31,9 +31,9 @@ kil = str(killed)
 def load_images(path):
     images = []
     for file_name in os.listdir(path):
-        image = pg.image.load(path + os.sep + file_name)  # .convert_alpha()
+        image = pg.image.load(path + os.sep + file_name)
         images.append(image)
-    print(path, images)
+    # print(path, images)
     return images
 
 
@@ -295,7 +295,7 @@ class SpriteAnimation(pg.sprite.Sprite):
         self.image = images[int(self.index % len(images))]
 
         self.position += self.velocity
-        self.rect.center = self.position
+        self.rect.center = int(self.position[0]), int(self.position[1])
         self.rect = self.image.get_rect(center=self.rect.center)
 
 
@@ -315,7 +315,7 @@ class Sprite(pg.sprite.Sprite):
         images = [pg.transform.rotozoom(obj2, -self.angle, self.scale) for obj2 in self.images]
         self.image = images[0]
         self.position += self.velocity
-        self.rect.center = self.position
+        self.rect.center = int(self.position[0]), int(self.position[1])
         self.rect = self.image.get_rect(center=self.rect.center)
 
 
@@ -325,7 +325,7 @@ class Burn(pg.sprite.Sprite):
         self.images = images
         self.frame = 0
         self.image = self.images[self.frame]
-        self.rect = self.image.get_rect(center=(x, y - self.image.get_height() / 3))
+        self.rect = self.image.get_rect(center=(int(x), int(y - self.image.get_height() / 3.)))
 
     def update(self):
         self.frame += 0.2
@@ -484,7 +484,7 @@ while True:
     if tank2.position.x > WIDTH_WIN + tank_width * 2 or tank2.position.x < 0 \
             or tank2.position.y < 0 or tank2.position.y > HEIGHT_WIN:
         tank2.position.y = HEIGHT_WIN - HEIGHT_Earth * 1.2
-        tank2.rect.y = tank2.position.y
+        tank2.rect.y = int(tank2.position.y)
         tank2.velocity.y = 0
 
     """Дуло"""
@@ -561,13 +561,13 @@ while True:
 
     """Снаряды - collision"""
     if pg.sprite.spritecollide(tank2, shell_box, True):
-        print('снаряд - T2')
+        # print('снаряд - T2')
         killed += 1
         life += 0.2
         all_sprites.add(explosion, layer=4)
         expT = True
     elif pg.sprite.spritecollide(helicopter, shell_box, True, pg.sprite.collide_rect_ratio(.4)):
-        print('снаряд - H')
+        # print('снаряд - H')
         killed += 1
         life += 0.2
         all_sprites.add(explosion, layer=4)
@@ -590,12 +590,12 @@ while True:
             all_sprites.remove(explosion)
     elif pg.sprite.spritecollide(helicopter, player_box, True, pg.sprite.collide_rect_ratio(.7)):
         life -= 1
-        print('H-T1')
+        # print('H-T1')
         all_sprites.remove(other_box)
         hit = True
     elif pg.sprite.spritecollide(tank2, player_box, True):
         life -= 1
-        print('T1-T2')
+        # print('T1-T2')
         all_sprites.remove(other_box)
         hit = True
     elif pg.sprite.spritecollideany(tank1, bullet_box):
@@ -607,7 +607,7 @@ while True:
         else:
             life -= 1
         expH1 = True
-        print('пули - Т1')
+        # print('пули - Т1')
     elif shell2.position.x < 1:
         explosion2.position = (0, shell2.position.y)
         expT1 = True
@@ -621,7 +621,7 @@ while True:
         else:
             life -= 2
         expT1 = True
-        print('снаряд2 - Т1')
+        # print('снаряд2 - Т1')
 
     if expT1:
         shell2.position.x = WIDTH_WIN * 2
@@ -720,5 +720,5 @@ while True:
 
     all_sprites.update()
     all_sprites.draw(screen)
-    pg.display.set_caption(f'Tanks8                      FPS: {int(clock.get_fps())}')
+    pg.display.set_caption(f'Tanks8   FPS: {int(clock.get_fps())}')
     pg.display.update()
