@@ -256,28 +256,25 @@ class Earth(pg.sprite.Sprite):
         gravitation()
 
 
-class Stars:
+class Stars(pg.sprite.Sprite):
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
+        pg.sprite.Sprite.__init__(self)
         self.speed = random.randint(1, 3)
         self.STARS_SIZE = random.randint(8, 16)
         self.image_filename = 'Image/star16.png'
         self.img = pg.image.load(self.image_filename)
         self.image = pg.transform.scale(self.img, (self.STARS_SIZE, self.STARS_SIZE))
+        self.rect = self.image.get_rect(center=(x, y))
 
-    def move_star(self):
-        self.x -= self.speed
-        if self.x < 0:
-            self.x = WIDTH_WIN
-
-    def draw_star(self):
-        screen.blit(self.image, (self.x, self.y))
+    def update(self):
+        self.rect.x -= self.speed
+        if self.rect.x < 0:
+            self.rect.x = WIDTH_WIN
 
 
 class SpriteAnimation(pg.sprite.Sprite):
     def __init__(self, images, x, y, dx, dy, angle, scale):
-        super().__init__()
+        pg.sprite.Sprite.__init__(self)
         self.angle = angle
         self.scale = scale
         self.images = [pg.transform.flip(im, dx, dy) for im in images]
@@ -332,11 +329,11 @@ class Burn(pg.sprite.Sprite):
         self.image = self.images[int(self.frame % len(self.images))]
 
 
-def initialize_stars(stars_max, star):
-    for n in range(0, stars_max):
+def initialize_stars(stars_max):
+    for _ in range(stars_max):
         xx = random.randint(0, WIDTH_WIN)
         yy = random.randint(0, HEIGHT_WIN - HEIGHT_Earth)
-        star.append(Stars(xx, yy))
+        all_sprites.add(Stars(xx, yy), layer=-1)
 
 
 def gravitation():
@@ -353,8 +350,6 @@ def gravitation():
 
 
 """____________________________________________________Main_______________________________________________________"""
-stars = []
-initialize_stars(STARS_MAX, stars)
 
 salvo = 0
 salvoT = False
@@ -442,6 +437,8 @@ all_sprites.add(sight, layer=5)
 all_sprites.add(bullet_box, layer=0)
 all_sprites.add(shell2, layer=0)
 
+initialize_stars(STARS_MAX)
+
 """Пункты меню"""
 menu_points = [(330, 250, 'GAME', (250, 250, 30), (250, 30, 250), 0),
                (350, 350, 'QUIT', (250, 250, 30), (250, 30, 250), 1)]
@@ -453,7 +450,9 @@ soundH = pg.mixer.Sound('Sound/Выстрел Н.wav')
 soundH.set_volume(0.3)
 soundT1 = pg.mixer.Sound('Sound/Выстрел Т1.wav')
 soundT2 = pg.mixer.Sound('Sound/Выстрел Т2.wav')
+
 """___________________________________________игровой цикл__________________________________________________"""
+
 while True:
     clock.tick(FPS)
     for e in pg.event.get():
@@ -708,17 +707,14 @@ while True:
         menu_points[0] = (330, 250, 'PAUSE', (250, 250, 30), (250, 30, 250), 0)
         game.menu()
 
+    all_sprites.update()
     screen.fill(BACKGROUND_COLOR)
-    for i in stars:
-        i.move_star()
-        i.draw_star()
 
     info_string.fill((90, 0, 255))
     info_string.blit(text_font.render(f'Points: {killed}', 1, (255, 255, 255)), (10, 2))
     info_string.blit(text_font.render(f'Life: {int(life)}', 1, (255, 255, 255)), (868, 2))
     screen.blit(info_string, (0, 0))
 
-    all_sprites.update()
     all_sprites.draw(screen)
     pg.display.set_caption(f'Tanks8   FPS: {int(clock.get_fps())}')
     pg.display.update()
