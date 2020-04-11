@@ -268,8 +268,8 @@ class Stars(pg.sprite.Sprite):
 
     def update(self):
         self.rect.x -= self.speed
-        if self.rect.x < 0:
-            self.rect.x = WIDTH_WIN
+        if self.rect.right < 0:
+            self.rect.left = WIDTH_WIN
 
 
 class SpriteAnimation(pg.sprite.Sprite):
