@@ -242,7 +242,6 @@ class Earth(pg.sprite.Sprite):
         self.images = images
         self.index = 0  # первый кадр (костюм)
         self.image = self.images[self.index]
-
         self.rect = self.image.get_rect(topleft=(x, y))
 
     def update(self):
@@ -253,7 +252,6 @@ class Earth(pg.sprite.Sprite):
             if self.index >= len(self.images):
                 self.index = 0
             self.image = self.images[self.index]
-        gravitation()
 
 
 class Stars(pg.sprite.Sprite):
@@ -292,7 +290,7 @@ class SpriteAnimation(pg.sprite.Sprite):
         self.image = images[int(self.index % len(images))]
 
         self.position += self.velocity
-        self.rect.center = int(self.position[0]), int(self.position[1])
+        self.rect.center = int(self.position.x), int(self.position.y)
         self.rect = self.image.get_rect(center=self.rect.center)
 
 
@@ -312,7 +310,7 @@ class Sprite(pg.sprite.Sprite):
         images = [pg.transform.rotozoom(obj2, -self.angle, self.scale) for obj2 in self.images]
         self.image = images[0]
         self.position += self.velocity
-        self.rect.center = int(self.position[0]), int(self.position[1])
+        self.rect.center = int(self.position.x), int(self.position.y)
         self.rect = self.image.get_rect(center=self.rect.center)
 
 
@@ -338,15 +336,16 @@ def initialize_stars(stars_max):
 
 def gravitation():
     tank1.velocity.y += 1
+    # tank1.position.y += tank1.velocity.y  # есть в class
     while tank1.rect.colliderect(earth.rect) or tank1.rect.colliderect(earth_clone.rect):
-        tank1.rect.y -= 1
         tank1.position.y -= 1
         tank1.velocity.y = 0
+        tank1.rect.centery = int(tank1.position.y)
     tank2.velocity.y += 1
     while tank2.rect.colliderect(earth.rect) or tank2.rect.colliderect(earth_clone.rect):
-        tank2.rect.y -= 1
         tank2.position.y -= 1
         tank2.velocity.y = 0
+        tank2.rect.centery = int(tank2.position.y)
 
 
 """____________________________________________________Main_______________________________________________________"""
@@ -463,6 +462,7 @@ while True:
             if e.button == 1:
                 salvo = 1
 
+    gravitation()
     """Танк1"""
     if tank1.position.x < tank1_pos:
         tank1.position.x += speed / 1.5
