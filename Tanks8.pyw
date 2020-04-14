@@ -290,8 +290,7 @@ class SpriteAnimation(pg.sprite.Sprite):
         self.image = images[int(self.index % self.range)]
 
         self.position += self.velocity
-        self.rect.center = int(self.position.x), int(self.position.y)
-        self.rect = self.image.get_rect(center=self.rect.center)
+        self.rect = self.image.get_rect(center=(int(self.position.x), int(self.position.y)))
 
 
 class Sprite(pg.sprite.Sprite):
@@ -310,8 +309,7 @@ class Sprite(pg.sprite.Sprite):
         images = [pg.transform.rotozoom(obj2, -self.angle, self.scale) for obj2 in self.images]
         self.image = images[0]
         self.position += self.velocity
-        self.rect.center = int(self.position.x), int(self.position.y)
-        self.rect = self.image.get_rect(center=self.rect.center)
+        self.rect = self.image.get_rect(center=(int(self.position.x), int(self.position.y)))
 
 
 class Burn(pg.sprite.Sprite):
