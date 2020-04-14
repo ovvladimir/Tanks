@@ -241,6 +241,7 @@ class Earth(pg.sprite.Sprite):
 
         self.images = images
         self.index = 0  # первый кадр (костюм)
+        self.range = len(self.images)
         self.image = self.images[self.index]
         self.rect = self.image.get_rect(topleft=(x, y))
 
@@ -248,9 +249,7 @@ class Earth(pg.sprite.Sprite):
         self.rect.x -= speed
         if self.rect.x <= -WIDTH_WIN:
             self.rect.x = WIDTH_WIN
-            self.index += random.randint(1, 2)
-            if self.index >= len(self.images):
-                self.index = 0
+            self.index = random.randrange(self.range)
             self.image = self.images[self.index]
 
 
@@ -278,6 +277,7 @@ class SpriteAnimation(pg.sprite.Sprite):
         self.images = [pg.transform.flip(im, dx, dy) for im in images]
 
         self.index = 0
+        self.range = len(self.images)
         self.image = self.images[self.index]
 
         self.rect = self.image.get_rect()
@@ -287,7 +287,7 @@ class SpriteAnimation(pg.sprite.Sprite):
     def update(self):
         images = [pg.transform.rotozoom(img, -self.angle, self.scale) for img in self.images]
         self.index += 0.2
-        self.image = images[int(self.index % len(images))]
+        self.image = images[int(self.index % self.range)]
 
         self.position += self.velocity
         self.rect.center = int(self.position.x), int(self.position.y)
@@ -319,12 +319,13 @@ class Burn(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self)
         self.images = images
         self.frame = 0
+        self.range = len(self.images)
         self.image = self.images[self.frame]
         self.rect = self.image.get_rect(center=(int(x), int(y - self.image.get_height() / 3.)))
 
     def update(self):
         self.frame += 0.2
-        self.image = self.images[int(self.frame % len(self.images))]
+        self.image = self.images[int(self.frame % self.range)]
 
 
 def initialize_stars(stars_max):
