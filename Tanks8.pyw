@@ -335,7 +335,7 @@ def initialize_stars(stars_max):
 
 def gravitation():
     tank1.velocity.y += 1
-    # tank1.position.y += tank1.velocity.y  # есть в class SpriteAnimation
+    # tank1.position.y += tank1.velocity.y  # есть в class
     while pg.sprite.spritecollideany(tank1, earthGroup, pg.sprite.collide_rect_ratio(0.98)):
         tank1.position.y -= 1
         tank1.velocity.y = 0
