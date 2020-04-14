@@ -336,12 +336,12 @@ def initialize_stars(stars_max):
 def gravitation():
     tank1.velocity.y += 1
     # tank1.position.y += tank1.velocity.y  # есть в class
-    while tank1.rect.colliderect(earth.rect) or tank1.rect.colliderect(earth_clone.rect):
+    while pg.sprite.spritecollideany(tank1, earthGroup, pg.sprite.collide_rect_ratio(0.98)):
         tank1.position.y -= 1
         tank1.velocity.y = 0
         tank1.rect.centery = int(tank1.position.y)
     tank2.velocity.y += 1
-    while tank2.rect.colliderect(earth.rect) or tank2.rect.colliderect(earth_clone.rect):
+    while pg.sprite.spritecollideany(tank2, earthGroup, pg.sprite.collide_rect_ratio(0.98)):
         tank2.position.y -= 1
         tank2.velocity.y = 0
         tank2.rect.centery = int(tank2.position.y)
@@ -423,6 +423,7 @@ images12 = load_images(path='Image/Mouse')
 mouseMenu = Sprite(x=780, y=330, dx=False, dy=False, images=images12,
                    angle=0, scale=0.2)
 
+earthGroup = pg.sprite.Group(earth, earth_clone)
 bullet_box = pg.sprite.Group(bullet)
 shell_box = pg.sprite.Group(shell)
 shell2_box = pg.sprite.Group(shell2)
@@ -564,14 +565,13 @@ while True:
         life += 0.2
         all_sprites.add(explosion, layer=4)
         expT = True
-    elif pg.sprite.spritecollide(helicopter, shell_box, True, pg.sprite.collide_rect_ratio(.4)):
+    elif pg.sprite.spritecollide(helicopter, shell_box, True, pg.sprite.collide_circle_ratio(.6)):
         # print('снаряд - H')
         killed += 1
         life += 0.2
         all_sprites.add(explosion, layer=4)
         expH = True
-    elif shell.rect.colliderect(earth.rect) \
-            or shell.rect.colliderect(earth_clone.rect) or shell.position.x >= WIDTH_WIN - 10:
+    elif pg.sprite.spritecollideany(shell, earthGroup) or shell.position.x >= WIDTH_WIN - 10:
         all_sprites.remove(shell_box)
         all_sprites.add(explosion, layer=4)
         if explosion.scale < 0.2:
