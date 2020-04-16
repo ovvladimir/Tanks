@@ -512,7 +512,7 @@ while True:
         time_fire1 = 0
         soundH.stop()
         soundT1.play()
-    elif not fire.rect.colliderect(barrel.rect):
+    elif not pg.sprite.collide_rect(fire, barrel):
         all_sprites.add(shell_box, layer=0)
         all_sprites.add(fire, layer=1)
         time_fire1 += 1
@@ -551,7 +551,7 @@ while True:
         bullet.velocity = pg.math.Vector2(-15 - speed - speedH, 0).rotate(bullet.angle)
         soundH.play()
     if bullet.position.x < 0 or helicopter.position.x > WIDTH_WIN \
-            or bullet.rect.colliderect(earth.rect) or bullet.rect.colliderect(earth_clone.rect) \
+            or pg.sprite.collide_rect(bullet, earth) or pg.sprite.collide_rect(bullet, earth_clone) \
             or expH1:
         bullet.velocity = (0, 0)
         bullet.position.x = helicopter.position.x - h_width * helicopter.scale / 2.0
