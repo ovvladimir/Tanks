@@ -336,7 +336,7 @@ def initialize_stars(stars_max):
 def gravitation():
     tank1.velocity.y += 1
     # tank1.position.y += tank1.velocity.y  # есть в class
-    while pg.sprite.spritecollideany(tank1, earthGroup, pg.sprite.collide_rect_ratio(0.98)):
+    while pg.sprite.spritecollideany(tank1, earthGroup, pg.sprite.collide_mask):
         tank1.position.y -= 1
         tank1.velocity.y = 0
         tank1.rect.centery = int(tank1.position.y)
@@ -424,6 +424,9 @@ mouseMenu = Sprite(x=780, y=330, dx=False, dy=False, images=images12,
                    angle=0, scale=0.2)
 
 earthGroup = pg.sprite.Group(earth, earth_clone)
+for sp in earthGroup:
+    earthColor = sp.image.get_at((30, 30))
+    sp.mask = pg.mask.from_threshold(sp.image, earthColor, (1, 1, 1, 255))
 bullet_box = pg.sprite.Group(bullet)
 shell_box = pg.sprite.Group(shell)
 shell2_box = pg.sprite.Group(shell2)
