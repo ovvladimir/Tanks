@@ -471,7 +471,6 @@ while True:
         tank1.position.x += speed / 1.5
         all_sprites.remove(shell_box)
         all_sprites.remove(fire)
-        tank1.velocity.y = 0
 
     """Вертолет"""
     _, helicopter.angle = (tank1.position - helicopter.position).as_polar()
@@ -485,9 +484,7 @@ while True:
     tank2.position.x -= speed + speedT
     if tank2.position.x > WIDTH_WIN + tank_width * 2 or tank2.position.x < 0 \
             or tank2.position.y < 0 or tank2.position.y > HEIGHT_WIN:
-        tank2.position.y = HEIGHT_WIN - HEIGHT_Earth * 1.2
-        tank2.rect.y = int(tank2.position.y)
-        tank2.velocity.y = 0
+        tank2.position.y = HEIGHT_WIN - HEIGHT_Earth
 
     """Дуло"""
     _, barrel.angle = (pg.mouse.get_pos() - barrel.position).as_polar()
