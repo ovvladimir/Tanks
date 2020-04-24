@@ -683,7 +683,7 @@ while True:
         all_sprites.add(other_box, layer=2)
         player_box.add(tank1)
         all_sprites.add(player_box, layer=3)
-        tank1.position.x = -tank_width * 5
+        tank1.position.x = -WIDTH_WIN // 2
         tank2.position.x = WIDTH_WIN * random.randint(2, 3)
         helicopter.position.x = WIDTH_WIN * random.randint(2, 3)
         helicopter.position.y = random.randint(-200, HEIGHT_WIN - HEIGHT_Earth * 1.5)
