@@ -26,6 +26,7 @@ speed = 8
 life = 11
 killed = 0
 kil = str(killed)
+vec = pg.math.Vector2
 
 
 def load_images(path):
@@ -166,14 +167,14 @@ class Menu:
                     runMenu = False
                     sys.exit(0)
 
-            bullet.velocity = pg.math.Vector2(-15, 0)
+            bullet.velocity = vec(-15, 0)
             if bullet.position.x < 0:
                 bullet.position.x = helicopter.position.x - h_width * helicopter.scale / 2.0
                 bullet.position.y = helicopter.position.y + h_height * helicopter.scale / 2.5
 
             if fire_block == 0:
                 if tf == 1:
-                    fire.velocity = pg.math.Vector2(5, 0).rotate(-10)
+                    fire.velocity = vec(5, 0).rotate(-10)
                     time_fire += 2
                     if time_fire > 20:
                         fire.kill()
@@ -251,6 +252,7 @@ class Earth(pg.sprite.Sprite):
             self.rect.x = WIDTH_WIN
             self.index = random.randrange(self.range)
             self.image = self.images[self.index]
+            mask()
 
 
 class Stars(pg.sprite.Sprite):
@@ -281,8 +283,8 @@ class SpriteAnimation(pg.sprite.Sprite):
         self.image = self.images[self.index]
 
         self.rect = self.image.get_rect()
-        self.position = pg.math.Vector2(x, y)
-        self.velocity = pg.math.Vector2()
+        self.position = vec(x, y)
+        self.velocity = vec()
 
     def update(self):
         images = [pg.transform.rotozoom(img, -self.angle, self.scale) for img in self.images]
@@ -302,8 +304,8 @@ class Sprite(pg.sprite.Sprite):
         self.image = self.images[0]
 
         self.rect = self.image.get_rect()
-        self.velocity = pg.math.Vector2().rotate(angle)
-        self.position = pg.math.Vector2(x, y)
+        self.velocity = vec().rotate(angle)
+        self.position = vec(x, y)
 
     def update(self):
         images = [pg.transform.rotozoom(obj2, -self.angle, self.scale) for obj2 in self.images]
@@ -345,6 +347,12 @@ def gravitation():
         tank2.position.y -= 1
         tank2.velocity.y = 0
         tank2.rect.centery = int(tank2.position.y)
+
+
+def mask():
+    for sp in earthGroup:
+        earthColor = sp.image.get_at((30, 30))
+        sp.mask = pg.mask.from_threshold(sp.image, earthColor, (1, 1, 1, 255))
 
 
 """____________________________________________________Main_______________________________________________________"""
@@ -424,9 +432,6 @@ mouseMenu = Sprite(x=780, y=330, dx=False, dy=False, images=images12,
                    angle=0, scale=0.2)
 
 earthGroup = pg.sprite.Group(earth, earth_clone)
-for sp in earthGroup:
-    earthColor = sp.image.get_at((30, 30))
-    sp.mask = pg.mask.from_threshold(sp.image, earthColor, (1, 1, 1, 255))
 bullet_box = pg.sprite.Group(bullet)
 shell_box = pg.sprite.Group(shell)
 shell2_box = pg.sprite.Group(shell2)
@@ -440,6 +445,7 @@ all_sprites.add(bullet_box, layer=0)
 all_sprites.add(shell2, layer=0)
 
 initialize_stars(STARS_MAX)
+mask()
 
 """Пункты меню"""
 menu_points = [(330, 250, 'GAME', (250, 250, 30), (250, 30, 250), 0),
@@ -474,7 +480,7 @@ while True:
 
     """Вертолет"""
     _, helicopter.angle = (tank1.position - helicopter.position).as_polar()
-    helicopter.velocity = pg.math.Vector2(speed + speedH, 0.3).rotate(helicopter.angle)
+    helicopter.velocity = vec(speed + speedH, 0.3).rotate(helicopter.angle)
     if helicopter.position.x < WIDTH_WIN:
         helicopter.scale += 0.004
         if helicopter.scale > h_max_scale:
@@ -506,8 +512,8 @@ while True:
         shell.position = barrel.position + (0, -1)
         fire.angle = barrel.angle
         shell.angle = barrel.angle
-        fire.velocity = pg.math.Vector2(15, 0).rotate(fire.angle)
-        shell.velocity = pg.math.Vector2(15, 0).rotate(shell.angle)
+        fire.velocity = vec(15, 0).rotate(fire.angle)
+        shell.velocity = vec(15, 0).rotate(shell.angle)
         salvoT = True
         time_fire1 = 0
         soundH.stop()
@@ -535,8 +541,8 @@ while True:
             shell2.position = barrel2.position - barrel2_pos
             fire2.angle = barrel2.angle
             shell2.angle = barrel2.angle
-            fire2.velocity = pg.math.Vector2(-15 - speed - speedT, 0).rotate(fire2.angle)
-            shell2.velocity = pg.math.Vector2(-15 - speed - speedT, 0).rotate(shell2.angle)
+            fire2.velocity = vec(-15 - speed - speedT, 0).rotate(fire2.angle)
+            shell2.velocity = vec(-15 - speed - speedT, 0).rotate(shell2.angle)
             soundH.stop()
             soundT2.play()
     if salvoT2:
@@ -548,7 +554,7 @@ while True:
     """Стрельба вертолета"""
     if helicopter.position.x < WIDTH_WIN:
         bullet.angle = helicopter.angle - 180
-        bullet.velocity = pg.math.Vector2(-15 - speed - speedH, 0).rotate(bullet.angle)
+        bullet.velocity = vec(-15 - speed - speedH, 0).rotate(bullet.angle)
         soundH.play()
     if bullet.position.x < 0 or helicopter.position.x > WIDTH_WIN \
             or pg.sprite.collide_rect(bullet, earth) or pg.sprite.collide_rect(bullet, earth_clone) \
