@@ -351,7 +351,6 @@ def gravitation():
 
 def mask():
     for sp in earthGroup:
-        earthColor = sp.image.get_at((30, 30))
         sp.mask = pg.mask.from_threshold(sp.image, earthColor, (1, 1, 1, 255))
 
 
@@ -374,6 +373,7 @@ images0 = load_images(path='Image/Earth')
 earth = Earth(x=0, y=HEIGHT_WIN - images0[0].get_height(), images=images0)
 earth_clone = Earth(x=WIDTH_WIN, y=HEIGHT_WIN - images0[0].get_height(),
                     images=images0)
+earthColor = images0[0].get_at((30, 30))
 
 images1 = load_images(path='Image/Tank1')
 tank1_pos = 196
@@ -477,6 +477,8 @@ while True:
         tank1.position.x += speed / 1.5
         all_sprites.remove(shell_box)
         all_sprites.remove(fire)
+        if tank1.position.x < 0:
+            tank1.velocity.y = 0
 
     """Вертолет"""
     _, helicopter.angle = (tank1.position - helicopter.position).as_polar()
