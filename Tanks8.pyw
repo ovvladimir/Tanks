@@ -300,16 +300,15 @@ class Sprite(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self)
         self.angle = angle
         self.scale = scale
-        self.images = [pg.transform.flip(obj, dx, dy) for obj in images]
-        self.image = self.images[0]
+        self.images = pg.transform.flip(images[0], dx, dy)
+        self.image = self.images
 
         self.rect = self.image.get_rect()
         self.velocity = vec().rotate(angle)
         self.position = vec(x, y)
 
     def update(self):
-        images = [pg.transform.rotozoom(obj2, -self.angle, self.scale) for obj2 in self.images]
-        self.image = images[0]
+        self.image = pg.transform.rotozoom(self.images, -self.angle, self.scale)
         self.position += self.velocity
         self.rect = self.image.get_rect(center=(int(self.position.x), int(self.position.y)))
 
