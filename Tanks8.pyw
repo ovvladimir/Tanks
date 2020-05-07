@@ -63,7 +63,7 @@ class Menu:
         tank1.velocity.y = 0
         tank1.position.x = 150
         tank1.position.y = 450
-        helicopter.velocity = (0, 0)
+        helicopter.velocity.x, helicopter.velocity.y = 0, 0
         helicopter.scale = h_max_scale
         helicopter.position.x = 750
         helicopter.position.y = 150
@@ -167,7 +167,7 @@ class Menu:
                     runMenu = False
                     sys.exit(0)
 
-            bullet.velocity = vec(-15, 0)
+            bullet.velocity.x, bullet.velocity.y = -15, 0
             if bullet.position.x < 0:
                 bullet.position.x = helicopter.position.x - h_width * helicopter.scale / 2.0
                 bullet.position.y = helicopter.position.y + h_height * helicopter.scale / 2.5
@@ -480,7 +480,7 @@ while True:
             tank1.velocity.y = 0
 
     """Вертолет"""
-    _, helicopter.angle = (tank1.position - helicopter.position).as_polar()
+    helicopter.angle = (tank1.position - helicopter.position).as_polar()[1]
     helicopter.velocity = vec(speed + speedH, 0.3).rotate(helicopter.angle)
     if helicopter.position.x < WIDTH_WIN:
         helicopter.scale += 0.004
@@ -494,7 +494,7 @@ while True:
         tank2.position.y = HEIGHT_WIN - HEIGHT_Earth
 
     """Дуло"""
-    _, barrel.angle = (pg.mouse.get_pos() - barrel.position).as_polar()
+    barrel.angle = barrel.velocity.angle_to(pg.mouse.get_pos() - barrel.position)
     if barrel.angle > 10:
         barrel.angle = 10
     if barrel.angle < -25:
@@ -525,7 +525,7 @@ while True:
         time_fire1 += 1
         if time_fire1 > 2:
             all_sprites.remove(fire)
-            fire.velocity = (0, 0)
+            fire.velocity.x, fire.velocity.y = 0, 0
             fire.position = barrel.position
     shell.update()
     fire.update()
@@ -560,7 +560,7 @@ while True:
     if bullet.position.x < 0 or helicopter.position.x > WIDTH_WIN \
             or pg.sprite.collide_rect(bullet, earth) or pg.sprite.collide_rect(bullet, earth_clone) \
             or expH1:
-        bullet.velocity = (0, 0)
+        bullet.velocity.x, bullet.velocity.y = 0, 0
         bullet.position.x = helicopter.position.x - h_width * helicopter.scale / 2.0
         bullet.position.y = helicopter.position.y + h_height * helicopter.scale / 1.4
         expH1 = False
@@ -581,15 +581,14 @@ while True:
     elif pg.sprite.spritecollideany(shell, earthGroup) or shell.position.x >= WIDTH_WIN - 10:
         all_sprites.remove(shell_box)
         all_sprites.add(explosion, layer=4)
+        shell.velocity.x, shell.velocity.y = 0, 0
         if explosion.scale < 0.2:
-            shell.velocity = (0, 0)
             explosion.position = shell.position
             explosion.scale += 0.01
         else:
             salvoT = False
-            shell.velocity = (0, 0)
             shell.position = barrel.position + (0, -1)
-            fire.velocity = (0, 0)
+            fire.velocity.x, fire.velocity.y = 0, 0
             fire.position = barrel.position
             explosion.scale = 0.01
             all_sprites.remove(explosion)
@@ -630,7 +629,7 @@ while True:
 
     if expT1:
         shell2.position.x = WIDTH_WIN * 2
-        shell2.velocity = (0, 0)
+        shell2.velocity.x, shell2.velocity.y = 0, 0
         all_sprites.add(explosion2, layer=4)
         if explosion2.scale < 0.2:
             explosion2.scale += 0.01
@@ -640,7 +639,7 @@ while True:
             expT1 = False
     if expT:
         if explosion.scale < 0.2:
-            shell.velocity = (0, 0)
+            shell.velocity.x, shell.velocity.y = 0, 0
             tank2.position.x += speed + speedT
             explosion.position = tank2.position
             explosion.scale += 0.01
@@ -656,10 +655,10 @@ while True:
             expT = False
     if expH:
         bullet.position.x = WIDTH_WIN * 2
-        bullet.velocity = (0, 0)
+        bullet.velocity.x, bullet.velocity.y = 0, 0
         if explosion.scale < 0.2:
-            shell.velocity = (0, 0)
-            helicopter.velocity = (-1, 2)
+            shell.velocity.x, shell.velocity.y = 0, 0
+            helicopter.velocity.x, helicopter.velocity.y = -1, 2
             explosion.position = helicopter.position
             explosion.scale += 0.01
         else:
@@ -675,7 +674,7 @@ while True:
             expH = False
     if hit:
         bullet.position.x = WIDTH_WIN * 2
-        bullet.velocity = (0, 0)
+        bullet.velocity.x, bullet.velocity.y = 0, 0
         all_sprites.remove(explosion)
         all_sprites.remove(explosion2)
         all_sprites.remove(shell_box)
@@ -694,11 +693,11 @@ while True:
         helicopter.scale = h_max_scale / 2
         speedH = random.randint(-1, 1)
         speedT = random.randint(0, 1)
-        fire.velocity = (0, 0)
+        fire.velocity.x, fire.velocity.y = 0, 0
         fire.position = barrel.position
-        shell2.velocity = (0, 0)
+        shell2.velocity.x, shell2.velocity.y = 0, 0
         shell2.position.x = WIDTH_WIN * 2
-        shell.velocity = (0, 0)
+        shell.velocity.x, shell.velocity.y = 0, 0
         shell.position = barrel.position + (0, -1)
         salvoT = False
         hit = False
