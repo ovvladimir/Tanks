@@ -492,6 +492,7 @@ while True:
     if tank2.position.x > WIDTH_WIN + tank_width * 2 or tank2.position.x < 0 \
             or tank2.position.y < 0 or tank2.position.y > HEIGHT_WIN:
         tank2.position.y = HEIGHT_WIN - HEIGHT_Earth
+        tank2.velocity.y = 0
 
     """Дуло"""
     barrel.angle = barrel.velocity.angle_to(pg.mouse.get_pos() - barrel.position)
