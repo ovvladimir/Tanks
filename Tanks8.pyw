@@ -124,47 +124,43 @@ class Menu:
                     burn_img.subsurface((141, 0, 141, 237))]
         burn = Burn(x=tank1.position.x, y=tank1.position.y, images=images13)
 
-        runMenu = True
-        while runMenu:
+        run = True
+        while run:
             clock.tick(FPS)
 
             m_pos = pg.mouse.get_pos()
             for b in self.points:
                 if b[0] < m_pos[0] < b[0] + font_menu_width and m_pos[1] > b[1]:
                     point = b[5]
-            for e in pg.event.get():
-                if e.type == pg.QUIT:
-                    runMenu = False
+            for ev in pg.event.get():
+                if ev.type == pg.QUIT:
                     sys.exit(0)
-                if e.type == pg.KEYDOWN:
-                    if e.key == pg.K_ESCAPE:
-                        runMenu = False
+                if ev.type == pg.KEYDOWN:
+                    if ev.key == pg.K_ESCAPE:
                         sys.exit(0)
-                    if e.key == pg.K_UP:
+                    if ev.key == pg.K_UP:
                         if point > 0:
                             point -= 1
-                    if e.key == pg.K_DOWN:
+                    if ev.key == pg.K_DOWN:
                         if point < len(self.points) - 1:
                             point += 1
-                    elif e.key == pg.K_RETURN:  # возврвт каретки (ENTER)
+                    elif ev.key == pg.K_RETURN:  # возврвт каретки (ENTER)
                         if point == 0 and fire_block == 0:
                             helicopter.position.x = WIDTH_WIN * 2
                             helicopter.scale = h_max_scale / 2
                             tank1.position.x = -200
                             pg.mouse.set_visible(False)
-                            runMenu = False
+                            run = False
                         elif point == 1:
-                            runMenu = False
                             sys.exit(0)
-                if e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
+                if ev.type == pg.MOUSEBUTTONDOWN and ev.button == 1:
                     if point == 0 and fire_block == 0:
                         helicopter.position.x = WIDTH_WIN * 2
                         helicopter.scale = h_max_scale / 2
                         tank1.position.x = -200
                         pg.mouse.set_visible(False)
-                        runMenu = False
+                        run = False
                     elif point == 1:
-                        runMenu = False
                         sys.exit(0)
 
             bullet.velocity.x, bullet.velocity.y = -15, 0
@@ -463,7 +459,6 @@ while True:
     clock.tick(FPS)
     for e in pg.event.get():
         if e.type == pg.QUIT or e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE:
-            pg.quit()
             sys.exit(0)
         elif e.type == pg.MOUSEBUTTONDOWN:
             if e.button == 1:
