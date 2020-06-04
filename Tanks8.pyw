@@ -27,12 +27,13 @@ life = 11
 killed = 0
 kil = str(killed)
 vec = pg.math.Vector2
+mainpath = os.path.dirname(__file__)
 
 
 def load_images(path):
     images = []
-    for file_name in os.listdir(path):
-        image = pg.image.load(path + os.sep + file_name)
+    for file_name in os.listdir(os.path.join(mainpath, path)):
+        image = pg.image.load(os.path.join(mainpath, path + os.sep + file_name))
         images.append(image)
     # print(path, images)
     return images
@@ -50,7 +51,6 @@ class Menu:
                 surface.blit(font.render(a[2], 1, a[3]), (a[0], a[1]))
 
     def menu(self):
-        global e, runMenu
         pg.mouse.set_visible(True)
         point = 0
         col = 250
@@ -102,22 +102,22 @@ class Menu:
         text6_pos = (70, 300)
 
         try:
-            d = open('Record/record.dat', 'r')
+            d = open(os.path.join(mainpath, 'Record/record.dat'), 'r')
             record = int(d.read())
             d.close()
         except FileNotFoundError:
-            with open('Record/record.dat', 'w') as d:
+            with open(os.path.join(mainpath, 'Record/record.dat'), 'w') as d:
                 record = 0
                 d.write(str(record))
         if record < killed:
             record = killed
-            d = open('Record/record.dat', 'w')
+            d = open(os.path.join(mainpath, 'Record/record.dat'), 'w')
             d.write(str(record))
             d.close()
         text8 = font_menu2.render(f"Current record: {record}", 1, text_color)
         text8_pos = (20, 50)
 
-        burn_img = pg.image.load("Image/Костер/1.png").convert(24)
+        burn_img = pg.image.load(os.path.join(mainpath, "Image/Костер/1.png")).convert(24)
         burn_img.set_alpha(125)
         burn_img.set_colorkey((0, 0, 0))
         images13 = [burn_img.subsurface((0, 0, 141, 237)),
@@ -156,16 +156,16 @@ class Menu:
                         elif point == 1:
                             runMenu = False
                             sys.exit(0)
-            if e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
-                if point == 0 and fire_block == 0:
-                    helicopter.position.x = WIDTH_WIN * 2
-                    helicopter.scale = h_max_scale / 2
-                    tank1.position.x = -200
-                    pg.mouse.set_visible(False)
-                    runMenu = False
-                elif point == 1:
-                    runMenu = False
-                    sys.exit(0)
+                if e.type == pg.MOUSEBUTTONDOWN and e.button == 1:
+                    if point == 0 and fire_block == 0:
+                        helicopter.position.x = WIDTH_WIN * 2
+                        helicopter.scale = h_max_scale / 2
+                        tank1.position.x = -200
+                        pg.mouse.set_visible(False)
+                        runMenu = False
+                    elif point == 1:
+                        runMenu = False
+                        sys.exit(0)
 
             bullet.velocity.x, bullet.velocity.y = -15, 0
             if bullet.position.x < 0:
@@ -260,8 +260,7 @@ class Stars(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self)
         self.speed = random.randint(1, 3)
         self.STARS_SIZE = random.randint(8, 16)
-        self.image_filename = 'Image/star16.png'
-        self.img = pg.image.load(self.image_filename)
+        self.img = pg.image.load(os.path.join(mainpath, 'Image/star16.png'))
         self.image = pg.transform.scale(self.img, (self.STARS_SIZE, self.STARS_SIZE))
         self.rect = self.image.get_rect(center=(x, y))
 
@@ -453,10 +452,10 @@ game = Menu(points=menu_points)
 game.menu()
 
 """Звук"""
-soundH = pg.mixer.Sound('Sound/Выстрел Н.wav')
+soundH = pg.mixer.Sound(os.path.join(mainpath, 'Sound/Выстрел Н.wav'))
 soundH.set_volume(0.3)
-soundT1 = pg.mixer.Sound('Sound/Выстрел Т1.wav')
-soundT2 = pg.mixer.Sound('Sound/Выстрел Т2.wav')
+soundT1 = pg.mixer.Sound(os.path.join(mainpath, 'Sound/Выстрел Т1.wav'))
+soundT2 = pg.mixer.Sound(os.path.join(mainpath, 'Sound/Выстрел Т2.wav'))
 
 """___________________________________________игровой цикл__________________________________________________"""
 
