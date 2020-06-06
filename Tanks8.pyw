@@ -134,34 +134,34 @@ class Menu:
                     point = b[5]
             for ev in pg.event.get():
                 if ev.type == pg.QUIT:
-                    sys.exit(0)
+                    run = False
                 if ev.type == pg.KEYDOWN:
                     if ev.key == pg.K_ESCAPE:
-                        sys.exit(0)
+                        run = False
                     if ev.key == pg.K_UP:
                         if point > 0:
                             point -= 1
                     if ev.key == pg.K_DOWN:
                         if point < len(self.points) - 1:
                             point += 1
-                    elif ev.key == pg.K_RETURN:  # возврвт каретки (ENTER)
+                    elif ev.key == pg.K_RETURN:
                         if point == 0 and fire_block == 0:
                             helicopter.position.x = WIDTH_WIN * 2
                             helicopter.scale = h_max_scale / 2
                             tank1.position.x = -200
                             pg.mouse.set_visible(False)
-                            run = False
+                            return True
                         elif point == 1:
-                            sys.exit(0)
+                            run = False
                 if ev.type == pg.MOUSEBUTTONDOWN and ev.button == 1:
                     if point == 0 and fire_block == 0:
                         helicopter.position.x = WIDTH_WIN * 2
                         helicopter.scale = h_max_scale / 2
                         tank1.position.x = -200
                         pg.mouse.set_visible(False)
-                        run = False
+                        return True
                     elif point == 1:
-                        sys.exit(0)
+                        run = False
 
             bullet.velocity.x, bullet.velocity.y = -15, 0
             if bullet.position.x < 0:
@@ -216,6 +216,7 @@ class Menu:
             menu_box.update()
             menu_box.draw(screen)
             pg.display.update()
+        return run
 
 
 class Health(pg.sprite.Sprite):
@@ -445,7 +446,7 @@ mask()
 menu_points = [(330, 250, 'GAME', (250, 250, 30), (250, 30, 250), 0),
                (350, 350, 'QUIT', (250, 250, 30), (250, 30, 250), 1)]
 game = Menu(points=menu_points)
-game.menu()
+runGame = game.menu()
 
 """Звук"""
 soundH = pg.mixer.Sound(os.path.join(mainpath, 'Sound/Выстрел Н.wav'))
@@ -455,14 +456,15 @@ soundT2 = pg.mixer.Sound(os.path.join(mainpath, 'Sound/Выстрел Т2.wav'))
 
 """___________________________________________игровой цикл__________________________________________________"""
 
-while True:
+while runGame:
     clock.tick(FPS)
     for e in pg.event.get():
         if e.type == pg.QUIT or e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE:
-            sys.exit(0)
+            runGame = False
         elif e.type == pg.MOUSEBUTTONDOWN:
             if e.button == 1:
                 salvo = 1
+    key = pg.key.get_pressed()
 
     gravitation()
     """Танк1"""
@@ -501,7 +503,6 @@ while True:
     sight.position = pg.mouse.get_pos()
 
     """Залп танка 1"""
-    key = pg.key.get_pressed()
     if (key[pg.K_SPACE] or salvo == 1) and tank1.position.x >= tank1_pos and hit is False and salvoT is False:
         shell_box.add(shell)
         fire.position = barrel.position
@@ -697,15 +698,17 @@ while True:
         salvoT = False
         hit = False
 
-    if life >= 10:
+    if life > 10:
         life = 10
     elif int(life) <= 0:
         life = 0
         menu_points[0] = (330, 250, 'CLICK', (250, 250, 30), (250, 250, 30), 0)
-        game.menu()
+        runGame = game.menu()
     elif key[pg.K_m]:
         menu_points[0] = (330, 250, 'PAUSE', (250, 250, 30), (250, 30, 250), 0)
-        game.menu()
+        runGame = game.menu()
+    if not runGame:
+        break
 
     all_sprites.update()
     screen.fill(BACKGROUND_COLOR)
@@ -718,3 +721,6 @@ while True:
     all_sprites.draw(screen)
     pg.display.set_caption(f'Tanks8   FPS: {int(clock.get_fps())}')
     pg.display.update()
+
+print('[EXIT]')
+sys.exit(0)
