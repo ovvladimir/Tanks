@@ -26,8 +26,15 @@ speed = 8
 life = 11
 killed = 0
 kil = str(killed)
+soundH_stop = True
 vec = pg.math.Vector2
 mainpath = os.path.dirname(__file__)
+
+"""Звук"""
+soundH = pg.mixer.Sound(os.path.join(mainpath, 'Sound/Выстрел Н.wav'))
+soundH.set_volume(0.5)
+soundT1 = pg.mixer.Sound(os.path.join(mainpath, 'Sound/Выстрел Т1.wav'))
+soundT2 = pg.mixer.Sound(os.path.join(mainpath, 'Sound/Выстрел Т2.wav'))
 
 
 def load_images(path):
@@ -79,6 +86,8 @@ class Menu:
         bullet.position.x = -1
         tf = 0
         time_fire = 20
+        soundH_stop = True
+        soundH.stop()
 
         menu_box = pg.sprite.Group(bullet, helicopter, barrel, tank1, mouseMenu)
 
@@ -117,9 +126,8 @@ class Menu:
         text8 = font_menu2.render(f"Current record: {record}", 1, text_color)
         text8_pos = (20, 50)
 
-        burn_img = pg.image.load(os.path.join(mainpath, "Image/Костер/1.png")).convert(24)
+        burn_img = pg.image.load(os.path.join(mainpath, "Image/Костер/1.png"))
         burn_img.set_alpha(125)
-        burn_img.set_colorkey((0, 0, 0))
         images13 = [burn_img.subsurface((0, 0, 141, 237)),
                     burn_img.subsurface((141, 0, 141, 237))]
         burn = Burn(x=tank1.position.x, y=tank1.position.y, images=images13)
@@ -448,12 +456,6 @@ menu_points = [(330, 250, 'GAME', (250, 250, 30), (250, 30, 250), 0),
 game = Menu(points=menu_points)
 runGame = game.menu()
 
-"""Звук"""
-soundH = pg.mixer.Sound(os.path.join(mainpath, 'Sound/Выстрел Н.wav'))
-soundH.set_volume(0.3)
-soundT1 = pg.mixer.Sound(os.path.join(mainpath, 'Sound/Выстрел Т1.wav'))
-soundT2 = pg.mixer.Sound(os.path.join(mainpath, 'Sound/Выстрел Т2.wav'))
-
 """___________________________________________игровой цикл__________________________________________________"""
 
 while runGame:
@@ -513,7 +515,6 @@ while runGame:
         shell.velocity = vec(15, 0).rotate(shell.angle)
         salvoT = True
         time_fire1 = 0
-        soundH.stop()
         soundT1.play()
     elif not pg.sprite.collide_rect(fire, barrel):
         all_sprites.add(shell_box, layer=0)
@@ -540,7 +541,6 @@ while runGame:
             shell2.angle = barrel2.angle
             fire2.velocity = vec(-15 - speed - speedT, 0).rotate(fire2.angle)
             shell2.velocity = vec(-15 - speed - speedT, 0).rotate(shell2.angle)
-            soundH.stop()
             soundT2.play()
     if salvoT2:
         time_fire2 += 1
@@ -552,7 +552,9 @@ while runGame:
     if helicopter.position.x < WIDTH_WIN:
         bullet.angle = helicopter.angle - 180
         bullet.velocity = vec(-15 - speed - speedH, 0).rotate(bullet.angle)
-        soundH.play()
+        if soundH_stop:
+            soundH.play(-1)
+            soundH_stop = False
     if bullet.position.x < 0 or helicopter.position.x > WIDTH_WIN \
             or pg.sprite.collide_rect(bullet, earth) or pg.sprite.collide_rect(bullet, earth_clone) \
             or expH1:
@@ -652,6 +654,8 @@ while runGame:
     if expH:
         bullet.position.x = WIDTH_WIN * 2
         bullet.velocity.x, bullet.velocity.y = 0, 0
+        soundH.stop()
+        soundH_stop = True
         if explosion.scale < 0.2:
             shell.velocity.x, shell.velocity.y = 0, 0
             helicopter.velocity.x, helicopter.velocity.y = -1, 2
@@ -695,6 +699,8 @@ while runGame:
         shell2.position.x = WIDTH_WIN * 2
         shell.velocity.x, shell.velocity.y = 0, 0
         shell.position = barrel.position + (0, -1)
+        soundH_stop = True
+        soundH.stop()
         salvoT = False
         hit = False
 
