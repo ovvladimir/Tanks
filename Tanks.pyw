@@ -364,7 +364,7 @@ def gravitation():
         tank1.rect.centery = tank1.position.y
 
     if tank2.position.x > WIDTH_WIN + tank2_width or tank2.position.x < 0 - tank2_width:
-        tank2.position.y = tank2_position_y
+        tank2.position.y = tank_position_y
         tank2.velocity.y = 0
     else:
         tank2.velocity.y += 1
@@ -443,7 +443,7 @@ helicopter = SpriteAnimation(x=750, y=150, dx=False, dy=True, images=images3, an
 
 images4 = load_images(os.path.join(mainpath, 'Image', 'Tank2'))
 tank2 = SpriteAnimation(x=WIDTH_WIN * 2, y=0, dx=False, dy=False, images=images4, angle=0, scale=1.7)
-tank2.position.y = tank2_position_y = earth.rect.top - images4[0].get_height() * tank2.scale // 2
+tank2.position.y = tank_position_y = earth.rect.top - images4[0].get_height() * tank2.scale // 2
 tank2_width = images4[0].get_width()
 
 images5 = load_images(os.path.join(mainpath, 'Image', 'Barrel2'))
@@ -518,7 +518,7 @@ while run[0]:
     if tank1.position.x < tank1_pos:
         tank1.position.x += speed / 1.5
         if tank1.position.x < 0:
-            tank1.position.y = tank2_position_y
+            tank1.position.y = tank_position_y
 
     "Танк2"
     tank2.position.x -= speed + speedT
