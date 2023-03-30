@@ -384,7 +384,6 @@ def start():
     shell.position = barrel.position
     soundH_stop[0] = True
     soundH.stop()
-    all_sprites.update()
 
 
 def icon():
