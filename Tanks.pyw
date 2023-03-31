@@ -565,9 +565,8 @@ while run[0]:
         if soundH_stop[0]:
             soundH.play(-1)
             soundH_stop[0] = False
-    if helicopter.position.x > WIDTH_WIN \
-            or pg.sprite.collide_rect(bullet, earth) or pg.sprite.collide_rect(bullet, earth_clone) \
-            or expH1 or bullet.position.x < 0:
+    if helicopter.position.x > WIDTH_WIN or expH1 or bullet.position.x < 0 \
+            or pg.sprite.collide_rect(bullet, earth) or pg.sprite.collide_rect(bullet, earth_clone):
         bullet.velocity.x, bullet.velocity.y = 0, 0
         bullet.position.x = helicopter.position.x - h_width * helicopter.scale / 2.0
         bullet.position.y = helicopter.position.y + h_height * helicopter.scale / 1.4
