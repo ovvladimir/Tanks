@@ -522,6 +522,7 @@ while run[0]:
 
     "Залп танка 1"
     if (key[pg.K_SPACE] or salvo == 1) and tank1.position.x >= tank1_pos and not salvoT:
+        all_sprites.add(fire, layer=2)
         shell.position = fire.position = barrel.position
         shell.angle = fire.angle = barrel.angle
         shell.velocity = vec(projectile_velocity, 0).rotate(shell.angle)
@@ -532,7 +533,6 @@ while run[0]:
         salvo = 0
         soundT1.play()
     elif counting and fire.position.x > barrel.rect.right - speed:
-        all_sprites.add(fire, layer=2)
         counting = False
     elif fire.position.x > barrel.rect.right + fire.rect.w:
         fire.velocity.x, fire.velocity.y = 0, 0
@@ -699,6 +699,7 @@ while run[0]:
 
     screen.fill(BACKGROUND_COLOR)
     all_sprites.update()
+    fire.image.set_alpha(0) if counting else fire.image.set_alpha(255)
     all_sprites.draw(screen)
     display_update()
 
