@@ -575,6 +575,8 @@ while run[0]:
     if expH or helicopter.position.x < barrel.rect.right + helicopter.rect.w / 2.:
         bullet.velocity.x, bullet.velocity.y = 0, 0
         bullet.position.x = WIDTH_WIN * 2
+        soundH_stop[0] = True
+        soundH.stop()
 
     "Снаряды - collision"
     pg.mask.from_surface(shell.image)
