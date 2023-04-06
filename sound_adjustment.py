@@ -11,7 +11,7 @@ class Volume(sprite.Sprite):
         self.x, self.y = self.radius, self.rect.h - self.radius
         self.color_circle = (255, 255, 255, 255)
         self.color_rect = (0, 185, 218, 128)
-        self.color_text = (0, 0, 220, 255)
+        self.color_text = (0, 0, 218, 255)
         self.alpha = 255
         self.volume = 0
         self.font = freetype.SysFont('arial', 16, True)
