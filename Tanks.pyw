@@ -8,9 +8,9 @@ os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 pg.init()
 SIZE_WINDOW = WIDTH_WIN, HEIGHT_WIN = 960, 720
-SIZE_FULLSCREEN = pg.SCALED | pg.FULLSCREEN
+FULLSCREEN = pg.SCALED | pg.FULLSCREEN
 BACKGROUND_COLOR = (13, 10, 253)
-screen_list = [0, SIZE_FULLSCREEN]
+screen_list = [0, FULLSCREEN]
 
 FPS = 60
 clock = pg.time.Clock()
