@@ -128,20 +128,20 @@ class SpriteAnimation(pg.sprite.Sprite):
         self.index = 0
         self.range = len(self.images)
         self.image = self.images[self.index]
+        self.mask = pg.mask.from_surface(self.image)
 
         self.rect = self.image.get_rect()
         self.position = vec(x, y)
         self.velocity = vec()
-        self.mask = pg.mask.from_surface(self.image)
 
     def update(self):
         images = [pg.transform.rotozoom(img, -self.angle, self.scale) for img in self.images]
         self.index += 0.2
         self.image = images[int(self.index % self.range)]
+        self.mask = pg.mask.from_surface(self.image)
 
         self.position += self.velocity
         self.rect = self.image.get_rect(center=self.position)
-        self.mask = pg.mask.from_surface(self.image)
 
 
 class Sprite(pg.sprite.Sprite):
