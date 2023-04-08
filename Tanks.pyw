@@ -32,7 +32,6 @@ speed = 8
 speedT = 0
 speedH = random.randint(-1, 1)
 mainpath = os.path.dirname(__file__)
-path_images = os.path.join(mainpath, 'Images')
 dict_images = {}
 
 "Пункты меню"
@@ -180,12 +179,12 @@ class Burn(pg.sprite.Sprite):
         self.image = self.images[int(self.frame % self.range)]
 
 
-def load_images() -> dict:
-    for npath in os.listdir(path_images):
+def load_images(path_images=os.path.join(mainpath, 'Images')) -> dict:
+    for subfolder in os.listdir(path_images):
         list_images = []
-        for file_name in sorted(os.listdir(os.path.join(path_images, npath))):
-            list_images.append(pg.image.load(os.path.join(path_images, npath, file_name)))
-        dict_images[npath] = list_images
+        for file_name in sorted(os.listdir(os.path.join(path_images, subfolder))):
+            list_images.append(pg.image.load(os.path.join(path_images, subfolder, file_name)))
+        dict_images[subfolder] = list_images
     del list_images
 
 
