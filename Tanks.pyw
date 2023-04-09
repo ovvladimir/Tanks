@@ -476,6 +476,9 @@ fullscreen = dict_images['Fullscr'][0]
 fullscreen_rect = fullscreen.get_rect(
     center=(WIDTH_WIN - fullscreen.get_width() // 2, HEIGHT_WIN - fullscreen.get_height() // 2))
 
+initialize_stars(STARS_MAX)
+del dict_images
+
 bullet_box = pg.sprite.Group(bullet)
 shell2_box = pg.sprite.Group(shell2)
 all_sprites.change_layer(shell, 1)
@@ -486,8 +489,6 @@ all_sprites.remove(mouseMenu)
 
 icon()
 menu()
-initialize_stars(STARS_MAX)
-del dict_images
 
 "___________________________________________игровой цикл__________________________________________________"
 
